@@ -1,0 +1,12 @@
+#Eclipse
+.classpath
+.project
+.settings
+
+#sbt
+.cache
+/target
+/project/target
+/project/project/target
+.history
+.worksheet
