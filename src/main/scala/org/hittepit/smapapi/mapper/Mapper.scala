@@ -7,7 +7,7 @@ import scala.annotation.tailrec
 
 trait Mapper[T,X] {
   val tableName: String
-  var pk:Option[ColumnDefinition[T,_,_]] = None
+  val pk:Option[ColumnDefinition[T,_,_]] = None
   
   implicit def columnToValue[S](c: ColumnDefinition[_, S, _])(implicit rs: ResultSet) = c.value
   
@@ -15,7 +15,7 @@ trait Mapper[T,X] {
   
   def generatedPrimaryKey[U, S](name: String, sqlType: SqlType[S], getter: T => U) = {
     val cd = new ColumnDefinition(name, sqlType, getter, true)
-    pk = Some(cd)
+//    pk = Some(cd)
     cd
   }
 
@@ -51,7 +51,11 @@ trait Mapper[T,X] {
 	    val sql = "select * from "+tableName+" where "+key.name+" = ?"
 	    val ps = connection.prepareStatement(sql)
 	    key.sqlType.setParameter(1,ps,Some(id))
-    //TODO
-    None
+	    val rs = ps.executeQuery()
+	    mapResultSet(rs, map(_)) match {
+	      case List(t) => Some(t)
+	      case Nil => None
+	      case _ => throw new Exception("PLus que une réponse") //TODO
+	    }
   }
 }
