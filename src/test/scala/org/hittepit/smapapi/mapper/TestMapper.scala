@@ -8,10 +8,12 @@ import java.sql.DriverManager
 import java.util.logging.Logger
 import org.slf4j.LoggerFactory
 import org.apache.commons.dbcp.BasicDataSource
+import org.hittepit.smapapi.transaction.TransactionManager
+import org.hittepit.smapapi.transaction.JdbcTransaction
 
 case class Book(id: Option[Int], isbn: String, title: String, author: Option[String])
 
-class BookMapper extends Mapper[Book, Int] {
+class BookMapper(val transactionManager:TransactionManager) extends Mapper[Book, Int] with JdbcTransaction {
   override val pk = Some(id)
   val tableName = "BOOK"
   def id = generatedPrimaryKey("id", Nullable(Integer), _.id)
@@ -32,8 +34,8 @@ class DataSource extends BasicDataSource {
 }
 
 class TestMapper extends WordSpec with MustMatchers {
-  val mapper = new BookMapper
-  val datasource = new DataSource
+  val mapper = new BookMapper(new TransactionManager{val dataSource = new DataSource()})
+  val datasource = new DataSource{}
 
   val c = datasource.getConnection
   var st = c.createStatement
@@ -55,7 +57,7 @@ class TestMapper extends WordSpec with MustMatchers {
   "The find method of a mapper" when {
     "called with an existing id with not null author" must {
       "return Some(b), b with Some(author)" in {
-        val b = mapper.find(1)(datasource.getConnection)
+        val b = mapper.find(1)
         b match {
           case Some(book) =>
             book.id must be(Some(1))
@@ -68,7 +70,7 @@ class TestMapper extends WordSpec with MustMatchers {
     }
     "called with an existing id with a null author" must {
       "return Some(b), author beigin None" in {
-        val b = mapper.find(2)(datasource.getConnection)
+        val b = mapper.find(2)
         b match {
           case Some(book) =>
             book.id must be(Some(2))
@@ -81,7 +83,7 @@ class TestMapper extends WordSpec with MustMatchers {
     }
     "called with a non existing id" must {
       "return None" in {
-        val b = mapper.find(40)(datasource.getConnection)
+        val b = mapper.find(40)
         b match {
           case Some(book) => fail
           case None =>
@@ -93,7 +95,7 @@ class TestMapper extends WordSpec with MustMatchers {
   "The findAll method of a mapper" when {
     "called" must {
       "return all objects in the mapped table" in {
-        val bs = mapper.findAll(datasource.getConnection)
+        val bs = mapper.findAll
         bs.size must be(2)
         bs must contain(Book(Some(1),"12312","Test",Some("toto")))
         bs must contain(Book(Some(2),"12313","Test2",None))
@@ -105,7 +107,7 @@ class TestMapper extends WordSpec with MustMatchers {
     "called with a transient object" must {
       "return a new object" in {
         val b = Book(None,"111","Nouveau",Some("ddd"))
-        val b2 = mapper.insert(b)(datasource.getConnection())
+        val b2 = mapper.insert(b)
         b2 must not be(null)
         b2.id.isDefined must be (true)
         b2.title must be("Nouveau")
