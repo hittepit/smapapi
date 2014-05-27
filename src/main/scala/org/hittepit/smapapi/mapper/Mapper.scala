@@ -14,9 +14,7 @@ trait Mapper[T,X] {
   def column[U, S](name: String, sqlType: SqlType[S], getter: T => U) = new ColumnDefinition(name, sqlType, getter, false)
   
   def generatedPrimaryKey[U, S](name: String, sqlType: SqlType[S], getter: T => U) = {
-    val cd = new ColumnDefinition(name, sqlType, getter, true)
-//    pk = Some(cd)
-    cd
+    new ColumnDefinition(name, sqlType, getter, true)
   }
 
   def map(implicit rs: ResultSet): T
@@ -38,6 +36,27 @@ trait Mapper[T,X] {
     }
     
     innerMap(Nil)
+  }
+  
+  def setId(id:X,entity:T):T
+  
+  def insert(entity:T)(implicit connection:Connection):T = {
+    val ps = connection.prepareStatement(insertSqlString)
+    insertable.zipWithIndex.foreach{el =>
+      val column = el._1
+      column.setValue(el._2+1, entity, ps)
+    }
+    ps.executeUpdate()
+    
+    //TODO gros brol....
+    val rs = ps.getGeneratedKeys()
+    rs.next
+    val i = pk.get.value(1)(rs) match {
+      case Some(n) => n
+      case x => x
+    }
+    
+    setId(i.asInstanceOf[X],entity)
   }
   
   def findAll(implicit connection:Connection):List[T] = {
