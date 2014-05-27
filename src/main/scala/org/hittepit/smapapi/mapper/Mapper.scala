@@ -22,7 +22,7 @@ trait Mapper[T, X] { this: JdbcTransaction =>
   val insertable: List[ColumnDefinition[T, _, _]]
   val updatable: List[ColumnDefinition[T, _, _]]
 
-  def insertSqlString = {
+  lazy val insertSqlString = {
     val columns = insertable.map(_.name).mkString(",")
 
     "insert into " + tableName + " (" + columns + ") values (" + (List.fill(insertable.size)("?")).mkString(",") + ")"

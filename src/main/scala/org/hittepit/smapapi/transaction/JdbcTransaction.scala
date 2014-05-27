@@ -4,14 +4,12 @@ import java.sql.Connection
 
 import org.slf4j.LoggerFactory
 
-trait JdbcTransaction {
-  val transactionManager: TransactionManager
-
-  val logger = LoggerFactory.getLogger(classOf[JdbcTransaction])
+trait JdbcTransaction extends TransactionManager{
+  override val logger = LoggerFactory.getLogger(classOf[JdbcTransaction])
 
   def inTransaction[T](f: Connection => T): T = {
     var result: Option[T] = None
-    val transaction = transactionManager.startNestedTransaction()
+    val transaction = startNestedTransaction(Updatable)
     try {
       result = Some(f(transaction.getConnection))
     } catch {
@@ -20,14 +18,14 @@ trait JdbcTransaction {
         transaction.setRollback
         throw e
     } finally {
-      transactionManager.closeNestedTransaction
+      closeNestedTransaction
     }
     result.get
   }
 
   def readOnly[T](f: Connection => T): T = {
     var result: Option[T] = None
-    val transaction = transactionManager.startNestedTransaction(ReadOnly())
+    val transaction = startNestedTransaction(ReadOnly)
     try {
       result = Some(f(transaction.getConnection))
     } catch {
@@ -36,7 +34,7 @@ trait JdbcTransaction {
         transaction.setRollback
         throw e
     } finally {
-      transactionManager.closeNestedTransaction
+      closeNestedTransaction
     }
     result.get
   }

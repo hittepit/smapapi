@@ -13,7 +13,7 @@ import org.hittepit.smapapi.transaction.JdbcTransaction
 
 case class Book(id: Option[Int], isbn: String, title: String, author: Option[String])
 
-class BookMapper(val transactionManager:TransactionManager) extends Mapper[Book, Int] with JdbcTransaction {
+class BookMapper(val dataSource:DataSource) extends Mapper[Book, Int] with JdbcTransaction {
   override val pk = Some(id)
   val tableName = "BOOK"
   def id = generatedPrimaryKey("id", Nullable(Integer), _.id)
@@ -34,8 +34,8 @@ class DataSource extends BasicDataSource {
 }
 
 class TestMapper extends WordSpec with MustMatchers {
-  val mapper = new BookMapper(new TransactionManager{val dataSource = new DataSource()})
   val datasource = new DataSource{}
+  val mapper = new BookMapper(datasource)
 
   val c = datasource.getConnection
   var st = c.createStatement

@@ -8,56 +8,59 @@ trait TransactionManager {
   val dataSource:DataSource
   val logger = LoggerFactory.getLogger(classOf[TransactionManager])
 
-  val transactionThreadLocal = new ThreadLocal[TransactionContext]
+  private val transactionThreadLocal = new ThreadLocal[Option[TransactionContext]]
+  transactionThreadLocal.set(None)
+ 
 
-  def startNestedTransaction(ro: ReadOnly = null): TransactionContext = {
-    def createOrDecoreTransaction(parent: TransactionContext, readOnly: ReadOnly) = if (parent == null) {
-      val connection = dataSource.getConnection()
-      connection.setAutoCommit(false)
-      TransactionContext(connection, readOnly)
-    } else {
-      TransactionContext(parent)
+  def startNestedTransaction(ro: TransactionMode = ReadOnly): TransactionContext = {
+    def createOrDecoreTransaction(parent: Option[TransactionContext], readOnly: TransactionMode) = parent match {
+      case None =>
+		  val connection = dataSource.getConnection()
+		  connection.setAutoCommit(false)
+		  TransactionContext(connection, readOnly)
+      case Some(parentTransaction) =>
+      	TransactionContext(parentTransaction)
     }
 
     val transaction = createOrDecoreTransaction(transactionThreadLocal.get(), ro)
 
-    transactionThreadLocal.set(transaction)
+    transactionThreadLocal.set(Some(transaction))
     transaction
   }
 
   def closeNestedTransaction: Option[TransactionContext] = {
-    var transaction = transactionThreadLocal.get
-    if (transaction == null) {
-      throw new RuntimeException("Transaction was closed while there was no transaction started.")
-    }
-    transaction.parent match {
-      case Some(t) =>
-        transactionThreadLocal.set(t)
-        Some(t)
-      case None =>
-        transactionThreadLocal.remove()
-        try {
-          if (!transaction.isReadonly) {
-            if (transaction.isRollback) {
-              transaction.getConnection.rollback()
-            } else {
-              transaction.getConnection.commit()
-            }
-          }
-          None
-        } catch {
-          case e: Throwable =>
-            logger.error("Exception caught whil closing the transaction", e)
-            throw e
-        } finally {
-          try {
-            transaction.getConnection.close()
-          } catch {
-            case e: Throwable =>
-              logger.error("Excepton caught while closing the connection", e)
-              throw e
-          }
-        }
+    transactionThreadLocal.get match {
+      case None => throw new RuntimeException("Attempt to close a non-existing transaction.")
+      case Some(transaction) =>
+		    transaction.parent match {
+		      case Some(t) =>
+		        transactionThreadLocal.set(Some(t))
+		        Some(t)
+		      case None =>
+		        transactionThreadLocal.set(None)
+		        try {
+		          if (!transaction.isReadonly) {
+		            if (transaction.isRollback) {
+		              transaction.getConnection.rollback()
+		            } else {
+		              transaction.getConnection.commit()
+		            }
+		          }
+		          None
+		        } catch {
+		          case e: Throwable =>
+		            logger.error("Exception caught whil closing the transaction", e)
+		            throw e
+		        } finally {
+		          try {
+		            transaction.getConnection.close()
+		          } catch {
+		            case e: Throwable =>
+		              logger.error("Excepton caught while closing the connection", e)
+		              throw e
+		          }
+		        }
+		    }
     }
   }
 }

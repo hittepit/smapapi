@@ -3,13 +3,12 @@ package org.hittepit.smapapi.transaction
 import scala.annotation.tailrec
 import java.sql.Connection
 
-class ReadOnly
-object ReadOnly {
-  def apply() = new ReadOnly
-}
+trait TransactionMode
+object ReadOnly extends TransactionMode
+object Updatable extends TransactionMode
 
 object TransactionContext {
-  def apply(con: Connection, ro: ReadOnly = null) = new TransactionContext(None) with BaseTransactionContext { val connection = con; val readonly = ro != null }
+  def apply(con: Connection, ro: TransactionMode = ReadOnly) = new TransactionContext(None) with BaseTransactionContext { val connection = con; val readonly = ro == ReadOnly }
   def apply(parent: TransactionContext) = new TransactionContext(Some(parent))
 }
 
