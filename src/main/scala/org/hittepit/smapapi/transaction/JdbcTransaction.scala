@@ -30,8 +30,7 @@ trait JdbcTransaction extends TransactionManager{
       result = Some(f(transaction.getConnection))
     } catch {
       case e: Throwable =>
-        logger.warn("Exception catched in execution. Mark transaction for rollback.", e)
-        transaction.setRollback
+        logger.warn("Exception catched in execution. Transaction is in readonly mode.", e)
         throw e
     } finally {
       closeNestedTransaction
