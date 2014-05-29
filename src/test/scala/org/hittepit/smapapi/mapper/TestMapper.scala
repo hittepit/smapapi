@@ -13,8 +13,8 @@ import org.hittepit.smapapi.transaction.JdbcTransaction
 
 case class Book(id: Option[Int], isbn: String, title: String, author: Option[String])
 
-class BookMapper(val dataSource:DataSource) extends Mapper[Book, Int] with JdbcTransaction {
-//  override val pk = Some(id)
+class BookMapper(val dataSource:DataSource) extends Mapper[Book, Option[Int]] with JdbcTransaction {
+  val pk = id
   val tableName = "BOOK"
   def id = generatedPrimaryKey("id", NullableInteger, (b:Book) => b.id, (book:Book,id:Option[Int]) => new Book(id,book.isbn,book.title,book.author))
   def isbn = column("isbn", NotNullableVarchar, (b:Book) => b.isbn)
