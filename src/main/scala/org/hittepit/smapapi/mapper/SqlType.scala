@@ -4,104 +4,95 @@ import java.sql.ResultSet
 import java.sql.PreparedStatement
 import java.sql.Types
 
-trait SqlType[T] {
-  protected def getValueFromResultSet(columnName: String)(implicit rs: ResultSet): T
-  protected def getValueFromResultSet(index:Int)(implicit rs: ResultSet): T
-  
-  def columnValue(columnName: String)(implicit rs: ResultSet) = {
-    val v = getValueFromResultSet(columnName)
-    if (rs.wasNull) throw new NullValueException else v
+trait SqlType[T]{
+  def columnValue(columnName:String)(implicit rs: ResultSet):T
+  def columnValue(index:Int)(implicit rs: ResultSet):T
+  def setParameter(index:Int,value:T)(implicit ps:PreparedStatement):Unit
+}
+
+object NotNullableVarchar extends SqlType[String]{
+  def columnValue(columnName:String)(implicit rs: ResultSet) = {
+    val v = rs.getString(columnName)
+    if(rs.wasNull) throw new NullValueException else v
   }
   
   def columnValue(index:Int)(implicit rs: ResultSet) = {
-    val v = getValueFromResultSet(index)
-    if (rs.wasNull) throw new NullValueException else v
+    val v = rs.getString(index)
+    if(rs.wasNull) throw new NullValueException else v
   }
   
-  def setParameter(index:Int, ps:PreparedStatement, value:Option[_]):Unit
+  def setParameter(index:Int,value:String)(implicit ps:PreparedStatement) = ps.setString(index, value)
 }
 
-object Integer extends SqlType[Int] {
-  def getValueFromResultSet(columnName: String)(implicit rs: ResultSet) = rs.getInt(columnName)
-  def getValueFromResultSet(index:Int)(implicit rs: ResultSet) = rs.getInt(index)
-
-  def setParameter(index:Int, ps:PreparedStatement, value:Option[_]){
-    value match {
-      case Some(v:Int) => ps.setInt(index,v)
-      case Some(_) => throw new Exception("Pas le bon type de paramètre") //TODO
-      case None => ps.setNull(index, Types.INTEGER)
-    }
-  }
-}
-
-object Varchar extends SqlType[String] {
-  def getValueFromResultSet(columnName: String)(implicit rs: ResultSet) = rs.getString(columnName)
-  def getValueFromResultSet(index:Int)(implicit rs: ResultSet) = rs.getString(index)
-
-  def setParameter(index:Int, ps:PreparedStatement, value:Option[_]){
-    value match {
-      case Some(v:String) => ps.setString(index,v)
-      case Some(_) => throw new Exception("Pas le bon type de paramètre") //TODO
-      case None => ps.setNull(index, Types.VARCHAR)
-    }
-  }
-}
-
-object Nullable {
-  def apply[T](sqlType: SqlType[T]): SqlType[Option[T]] = new SqlType[Option[T]] {
-    def getValueFromResultSet(columnName: String)(implicit rs: ResultSet): Option[T] = throw new Exception("Ne devrait jamais être appelé")
-    def getValueFromResultSet(index:Int)(implicit rs: ResultSet): Option[T] = throw new Exception("Ne devrait jamais être appelé")
-    
-    def setParameter(index:Int, ps:PreparedStatement, value:Option[_]) = sqlType.setParameter(index, ps, value)
-    
-    override def columnValue(columnName: String)(implicit rs: ResultSet) = {
-      try {
-        Some(sqlType.columnValue(columnName))
-      } catch {
-        case NullValueException() => None
-        case e: Throwable => throw e
-      }
-    }
-    
-    override def columnValue(index:Int)(implicit rs: ResultSet) = {
-      try {
-        Some(sqlType.columnValue(index))
-      } catch {
-        case NullValueException() => None
-        case e: Throwable => throw e
-      }
-    }
+object NullableVarchar extends SqlType[Option[String]]{
+  def columnValue(columnName:String)(implicit rs: ResultSet) = {
+    val v = rs.getString(columnName)
+    if(rs.wasNull) None else Some(v) 
   }
   
+  def columnValue(index:Int)(implicit rs: ResultSet) = {
+    val v = rs.getString(index)
+    if(rs.wasNull) None else Some(v) 
+  }
+  
+  def setParameter(index:Int,value:Option[String])(implicit ps:PreparedStatement) = value match {
+    case Some(s) => ps.setString(index, s)
+    case None => ps.setNull(index,Types.VARCHAR)
+  }
 }
 
-object NotNullable {
-  def apply[T](sqlType: SqlType[T]): SqlType[T] = sqlType
+
+object NotNullableInteger extends SqlType[Int]{
+  def columnValue(columnName:String)(implicit rs: ResultSet) = {
+    val v = rs.getInt(columnName)
+    if(rs.wasNull) throw new NullValueException else v
+  }
+  
+  def columnValue(index:Int)(implicit rs: ResultSet) = {
+    val v = rs.getInt(index)
+    if(rs.wasNull) throw new NullValueException else v 
+  }
+  
+  def setParameter(index:Int,value:Int)(implicit ps:PreparedStatement) = ps.setInt(index, value)
 }
 
-class ColumnDefinition[T, S, U](n: String, st: SqlType[S], g: T => U, pk:Boolean) {
-	val name = n
-	val sqlType = st
-	val getter = g
-	val primaryKey = pk
+object NullableInteger extends SqlType[Option[Int]]{
+  def columnValue(columnName:String)(implicit rs: ResultSet) = {
+    val v = rs.getInt(columnName)
+    if(rs.wasNull) None else Some(v) 
+  }
+  
+  def columnValue(index:Int)(implicit rs: ResultSet) = {
+    val v = rs.getInt(index)
+    if(rs.wasNull) None else Some(v) 
+  }
+  
+  def setParameter(index:Int,value:Option[Int])(implicit ps:PreparedStatement) = value match {
+    case Some(s) => ps.setInt(index, s)
+    case None => ps.setNull(index,Types.INTEGER)
+  }
+}
+
+
+trait ColumnDefinition[E, P]{
+	val name:String
+	val sqlType:SqlType[P]
+	val getter: E => P
 	
-//  def convert(sqlValue: S): U = sqlValue.asInstanceOf[U]
-
-  def value(t: T): U = getter(t)
+  def value(t: E): P = getter(t)
 
   def value(implicit rs: ResultSet) = sqlType.columnValue(name)
   
   def value(index:Int)(implicit rs: ResultSet) = sqlType.columnValue(index)
   
-  def setValue(index:Int, entity:T, ps:PreparedStatement) = {
+  def setValue(index:Int, entity:E)(implicit ps:PreparedStatement) = {
 	  val v = value(entity)
-	  val optionValue = v match {
-	    case x:Option[_] => x
-	    case _ => Some(v)
-	  }
-	  
-	  sqlType.setParameter(index, ps, optionValue)
+	  sqlType.setParameter(index, v)
 	}
-  
-//  def format(v:Any):String = sqlType.formatSql(v)
+}
+
+trait PrimaryKeyColumnDefinition[E,P] extends ColumnDefinition[E,P]
+
+trait AutoGeneratedColumn[E,P]{this:PrimaryKeyColumnDefinition[E,P] =>
+  val setter:(E,P) => E 
 }

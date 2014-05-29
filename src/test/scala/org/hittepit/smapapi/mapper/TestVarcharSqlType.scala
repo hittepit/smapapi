@@ -10,12 +10,12 @@ import java.sql.PreparedStatement
 import java.sql.Types
 
 class TestVarcharSqlType extends WordSpec with MustMatchers with MockitoSugar {
-	"The columnValue method of a simple Varchar" when {
+	"The columnValue method of a NotNullableVarchar" when {
 	  "called for a varchar column containing a not null value" must {
 	    "return a String with the value" in {
 		  implicit val rs = mock[ResultSet]
 		  when(rs.getString("test")).thenReturn("hello")
-		  val v = Varchar.columnValue("test")
+		  val v = NotNullableVarchar.columnValue("test")
 		  v must be("hello")
 	    }
 	  }
@@ -25,37 +25,17 @@ class TestVarcharSqlType extends WordSpec with MustMatchers with MockitoSugar {
 		  when(rs.getString("test")).thenReturn(null)
 		  when(rs.wasNull()).thenReturn(true)
 		  
-		  an [NullValueException] must be thrownBy Varchar.columnValue("test")
+		  an [NullValueException] must be thrownBy NotNullableVarchar.columnValue("test")
 	    }
 	  }
 	}
   
-	"The columnValue method of a NotNullable Varchar" when {
-	  "called for a varchar column containing a not null value" must {
-	    "return a String with the value" in {
-		  implicit val rs = mock[ResultSet]
-		  when(rs.getString("test")).thenReturn("hello")
-		  val v = NotNullable(Varchar).columnValue("test")
-		  v must be("hello")
-	    }
-	  }
-	  "called for a varchar column containing null" must {
-	    "throw a NullValueException" in {
-		  implicit val rs = mock[ResultSet]
-		  when(rs.getString("test")).thenReturn(null)
-		  when(rs.wasNull()).thenReturn(true)
-		  
-		  an [NullValueException] must be thrownBy NotNullable(Varchar).columnValue("test")
-	    }
-	  }
-	}
-  
-	"The columnValue method of a Nullable Varchar" when {
+	"The columnValue method of a NullableVarchar" when {
 	  "called for a varchar column containing a not null value" must {
 	    "return Some(String) with the value" in {
 		  implicit val rs = mock[ResultSet]
 		  when(rs.getString("test")).thenReturn("hello")
-		  val v = Nullable(Varchar).columnValue("test")
+		  val v = NullableVarchar.columnValue("test")
 		  v must be(Some("hello"))
 	    }
 	  }
@@ -65,56 +45,35 @@ class TestVarcharSqlType extends WordSpec with MustMatchers with MockitoSugar {
 		  when(rs.getString("test")).thenReturn(null)
 		  when(rs.wasNull()).thenReturn(true)
 		  
-		  val v = Nullable(Varchar).columnValue("test")
+		  val v = NullableVarchar.columnValue("test")
 		  v must be(None)
 	    }
 	  }
 	}
 	
-	"The setParameter method of a simple Varchar" when{
-	  val sqlTypeUnderTest = Varchar
+	"The setParameter method of a NullableVarchar" when{
 	  "receiving a Some(String) and a PreparedStatement" must {
 	    "set the string on the preparedStatement" in {
-	      val ps = mock[PreparedStatement]
-	      sqlTypeUnderTest.setParameter(1, ps, Some("hello"))
+	      implicit val ps = mock[PreparedStatement]
+	      NullableVarchar.setParameter(1, Some("hello"))
 	      verify(ps).setString(1,"hello")
 	    }
 	  }
 	  "receiving None and a PreparedStatement" must {
 	    "set null on the PreparedStatement" in {
-	      val ps = mock[PreparedStatement]
-	      sqlTypeUnderTest.setParameter(1, ps, None)
+	      implicit val ps = mock[PreparedStatement]
+	      NullableVarchar.setParameter(1, None)
 	      verify(ps).setNull(1,Types.VARCHAR)
-	    }
-	  }
-	  "receiving Some(anything but a String) and a PreparedStatement" must {
-	    "throw an exception" in {
-	      val ps = mock[PreparedStatement]
-	      an [Exception] must be thrownBy sqlTypeUnderTest.setParameter(1,ps,Some(1))
 	    }
 	  }
 	}
 	
-	"The setParameter method of a Nullable Varchar" when{
-	  val sqlTypeUnderTest = Nullable(Varchar)
+	"The setParameter method of a NotNullableVarchar" when{
 	  "receiving a Some(String) and a PreparedStatement" must {
 	    "set the string on the preparedStatement" in {
-	      val ps = mock[PreparedStatement]
-	      sqlTypeUnderTest.setParameter(1, ps, Some("hello"))
+	      implicit val ps = mock[PreparedStatement]
+	      NotNullableVarchar.setParameter(1, "hello")
 	      verify(ps).setString(1,"hello")
-	    }
-	  }
-	  "receiving None and a PreparedStatement" must {
-	    "set null on the PreparedStatement" in {
-	      val ps = mock[PreparedStatement]
-	      sqlTypeUnderTest.setParameter(1, ps, None)
-	      verify(ps).setNull(1,Types.VARCHAR)
-	    }
-	  }
-	  "receiving Some(anything but a String) and a PreparedStatement" must {
-	    "throw an exception" in {
-	      val ps = mock[PreparedStatement]
-	      an [Exception] must be thrownBy sqlTypeUnderTest.setParameter(1,ps,Some(1))
 	    }
 	  }
 	}
