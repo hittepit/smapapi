@@ -27,6 +27,12 @@ class TestCondition extends WordSpec with MustMatchers with MockitoSugar {
         val sqlType = NotNullableVarchar;
         val getter = { x: Any => throw new Exception("Not used") }
       }, "test3")
+    val prop4 = new PropertyCondition(
+      new ColumnDefinition[Any, String] {
+        val name = "prop4";
+        val sqlType = NotNullableVarchar;
+        val getter = { x: Any => throw new Exception("Not used") }
+      }, "test4")
     val and = new AndCondition(prop1,prop2,prop3)
   trait TestEnvironment {
     val ps = mock[PreparedStatement]
@@ -94,6 +100,37 @@ class TestCondition extends WordSpec with MustMatchers with MockitoSugar {
       "return the current index" in new TestEnvironment{
         val i = fakeAnd.setParameter(3, ps)
         i must be (4)
+      }
+    }
+  }
+  
+  "A combination of 'and' and 'or'" when {
+    "sqlString of and(p1, or(p2,p3))" must {
+      "return p1 and (p2 or p3)" in new TestEnvironment{
+        val or = new OrCondition(prop2,prop3)
+        val and = new AndCondition(prop1,or)
+        and.sqlString must be("prop1=? and (prop2=? or prop3=?)")
+      }
+    }
+    "sqlString of or(and(p1, p2), p3)" must {
+      "return p1 and p2 or p3" in new TestEnvironment{
+        val and = new AndCondition(prop1,prop2)
+        val or = new OrCondition(and,prop3)
+        or.sqlString must be("prop1=? and prop2=? or prop3=?")
+      }
+    }
+    "sqlString of and(or(p1, p2), p3)" must {
+      "return (p1 or p2) and or p3" in new TestEnvironment{
+        val or = new OrCondition(prop1,prop2)
+        val and = new AndCondition(or,prop3)
+        and.sqlString must be("(prop1=? or prop2=?) and prop3=?")
+      }
+    }
+    "sqlString of or(p1, and(p2, p3))" must {
+      "return p1 or p2 and p3" in new TestEnvironment{
+        val and = new AndCondition(prop2,prop3)
+        val or = new OrCondition(prop1,and)
+        or.sqlString must be("prop1=? or prop2=? and prop3=?")
       }
     }
   }
