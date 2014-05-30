@@ -19,9 +19,13 @@ class PropertyCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
 class AndCondition(conditions:Condition*) extends Condition {
   def sqlString() = conditions match {
     case Seq(c1) => c1.sqlString()
-    case Seq(c1,cs@_*) => (c1.sqlString()/:cs)((currentSql,c)=>" and "+c.sqlString())
+    case Seq(c1,cs@_*) => (c1.sqlString()/:cs)((currentSql,c)=>currentSql+" and "+c.sqlString())
     case Nil => throw new Exception
   }
   
-  def setParameter(index:Int,ps:PreparedStatement):Int=2
+  def setParameter(index:Int,ps:PreparedStatement):Int={
+    var newIndex = index
+    conditions.foreach{c => newIndex = c.setParameter(newIndex, ps)}
+    newIndex
+  }
 } 
