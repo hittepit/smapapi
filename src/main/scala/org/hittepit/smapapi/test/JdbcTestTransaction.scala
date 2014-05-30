@@ -5,7 +5,7 @@ import java.sql.Connection
 import org.hittepit.smapapi.transaction.Updatable
 
 trait JdbcTestTransaction extends JdbcTransaction{
-  def inTestTransaction[T](f: Connection => T): T = {
+  def withRollback[T](f: Connection => T): T = {
     var result: Option[T] = None
     val transaction = startNestedTransaction(Updatable)
     try {
