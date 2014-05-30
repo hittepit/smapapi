@@ -70,14 +70,17 @@ trait Mapper[E, I] { this: JdbcTransaction =>
   
   private def getId(e:E):I = pk.getter(e)
   
-//  def update(entity:T):Unit = inTransaction{connection =>
-//    val ps = connection.prepareStatement(updateSqlString)
-//    updatable.zipWithIndex.foreach{ _ match{
-//      case (column,index) => column.setValue(index+1, entity, ps)
-//    }}
-//    pk.get.setValue(updatable.size+1, entity, ps)
-//    ps.executeUpdate
-//  }
+  def update(entity:E):Unit = inTransaction{connection =>
+    if(pk.value(entity) == None) throw new IllegalArgumentException("The entity has no Id")
+    val ps = connection.prepareStatement(updateSqlString)
+    updatable.zipWithIndex.foreach{ _ match{
+      case (column,index) => column.setValue(index+1, entity)(ps)
+    }}
+    pk.setValue(updatable.size+1, entity)(ps)
+    val n = ps.executeUpdate
+    if(n==0) throw new IllegalArgumentException("The object you're trying to update is transient")
+    if(n>1) throw new ConfigurationException("Not unique id in database. The id you defined is not a real PK and some values are duplicated in database")
+  }
 
   def findAll: List[E] = readOnly { connection =>
     val rs = connection.prepareStatement("select * from " + tableName).executeQuery
