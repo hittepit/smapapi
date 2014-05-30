@@ -59,7 +59,6 @@ trait Mapper[E, I] { this: JdbcTransaction =>
 	    rs.next
 	    val i = key.value(1)(rs)
 	    
-	    println("------------->"+key.setter)
 	    key.setter(entity,i)
 	    
       case key:PrimaryKeyColumnDefinition[E,I] => throw new NotImplementedError
