@@ -6,6 +6,8 @@ import java.sql.Connection
 import scala.annotation.tailrec
 import org.hittepit.smapapi.transaction.JdbcTransaction
 
+class Projection
+
 trait Mapper[E, I] { this: JdbcTransaction =>
   val tableName: String
   val pk: PrimaryKeyColumnDefinition[E,I]
@@ -33,7 +35,7 @@ trait Mapper[E, I] { this: JdbcTransaction =>
     "update "+tableName+" set "+updatable.map(_.name+"=?").mkString(",")+" where "+pk.name+"=?"
   }
 
-  def mapResultSet(rs: ResultSet, mapper: ResultSet => E): List[E] = {
+  private def mapResultSet(rs: ResultSet, mapper: ResultSet => E): List[E] = {
     @tailrec
     def innerMap(acc: List[E]): List[E] = if (rs.next()) {
       innerMap(mapper(rs) :: acc)
@@ -43,6 +45,10 @@ trait Mapper[E, I] { this: JdbcTransaction =>
 
     innerMap(Nil)
   }
+
+  def select(condition:Condition):E=throw new NotImplementedError
+  
+  def select(projection:Projection,condition:Condition)=throw new NotImplementedError
 
   def insert(entity: E): E = inTransaction { connection =>
     implicit val ps = connection.prepareStatement(insertSqlString)
