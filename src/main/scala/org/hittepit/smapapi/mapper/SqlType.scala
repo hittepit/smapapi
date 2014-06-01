@@ -3,6 +3,7 @@ package org.hittepit.smapapi.mapper
 import java.sql.ResultSet
 import java.sql.PreparedStatement
 import java.sql.Types
+import scala.language.higherKinds
 
 trait SqlType[T]{
   def columnValue(columnName:String)(implicit rs: ResultSet):T
@@ -10,35 +11,57 @@ trait SqlType[T]{
   def setParameter(index:Int,value:T)(implicit ps:PreparedStatement):Unit
 }
 
-object NotNullableVarchar extends SqlType[String]{
-  def columnValue(columnName:String)(implicit rs: ResultSet) = {
-    val v = rs.getString(columnName)
-    if(rs.wasNull) throw new NullValueException else v
-  }
-  
-  def columnValue(index:Int)(implicit rs: ResultSet) = {
-    val v = rs.getString(index)
-    if(rs.wasNull) throw new NullValueException else v
-  }
-  
-  def setParameter(index:Int,value:String)(implicit ps:PreparedStatement) = ps.setString(index, value)
+trait Base [T] {
+  val typesql:Int
+  def getColumnValue(columnName:String)(implicit rs:ResultSet):T
+  def getColumnValue(index:Int)(implicit rs:ResultSet):T
+  def setColumnValue(index:Int,value:T)(implicit ps:PreparedStatement):Unit
 }
 
-object NullableVarchar extends SqlType[Option[String]]{
-  def columnValue(columnName:String)(implicit rs: ResultSet) = {
+trait Nullable[X <: Option[_],T] extends SqlType[X] with Base[T]{
+  def columnValue(columnName:String)(implicit rs: ResultSet)=try {
+    Some(getColumnValue(columnName)).asInstanceOf[X]
+  } catch {
+    case e:NullValueException => None.asInstanceOf[X]
+  }
+  
+  def columnValue(index:Int)(implicit rs: ResultSet) = try {
+    Some(getColumnValue(index)).asInstanceOf[X]
+  } catch {
+    case e:NullValueException => None.asInstanceOf[X]
+  }
+  def setParameter(index:Int,value:X)(implicit ps:PreparedStatement):Unit = value match {
+    case Some(s) => setColumnValue(index, s.asInstanceOf[T])
+    case _ => ps.setNull(index,typesql)
+  }
+  
+}
+
+trait NotNullable[T] extends SqlType[T] with Base[T]{
+  def columnValue(columnName:String)(implicit rs: ResultSet)=getColumnValue(columnName)
+  
+  def columnValue(index:Int)(implicit rs: ResultSet) = getColumnValue(index)
+  
+  def setParameter(index:Int,value:T)(implicit ps:PreparedStatement):Unit = setColumnValue(index, value)
+}
+
+trait Varchar extends Base[String]{
+  val typesql=Types.VARCHAR
+  def getColumnValue(columnName:String)(implicit rs:ResultSet)={
     val v = rs.getString(columnName)
-    if(rs.wasNull) None else Some(v) 
+    if(rs.wasNull) throw new NullValueException else v
   }
-  
-  def columnValue(index:Int)(implicit rs: ResultSet) = {
+  def getColumnValue(index:Int)(implicit rs:ResultSet)={
     val v = rs.getString(index)
-    if(rs.wasNull) None else Some(v) 
+    if(rs.wasNull) throw new NullValueException else v
   }
-  
-  def setParameter(index:Int,value:Option[String])(implicit ps:PreparedStatement) = value match {
-    case Some(s) => ps.setString(index, s)
-    case None => ps.setNull(index,Types.VARCHAR)
-  }
+  def setColumnValue(index:Int,value:String)(implicit ps:PreparedStatement) = ps.setString(index,value)
+}
+
+object NullableVarchar extends Nullable[Option[String],String] with Varchar{
+}
+
+object NotNullableVarchar extends NotNullable[String] with Varchar{
 }
 
 
