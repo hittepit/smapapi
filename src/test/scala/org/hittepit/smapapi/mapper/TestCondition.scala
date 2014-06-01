@@ -9,25 +9,25 @@ import org.mockito.Mockito._
 import org.mockito.Matchers._
 
 class TestCondition extends WordSpec with MustMatchers with MockitoSugar {
-    val prop1 = new PropertyCondition(
+    val prop1 = new EqualsCondition(
       new ColumnDefinition[Any, String] {
         val name = "prop1";
         val sqlType = NotNullableVarchar;
         val getter = { x: Any => throw new Exception("Not used") }
       }, "test1")
-    val prop2 = new PropertyCondition(
+    val prop2 = new EqualsCondition(
       new ColumnDefinition[Any, String] {
         val name = "prop2";
         val sqlType = NotNullableVarchar;
         val getter = { x: Any => throw new Exception("Not used") }
       }, "test2")
-    val prop3 = new PropertyCondition(
+    val prop3 = new EqualsCondition(
       new ColumnDefinition[Any, String] {
         val name = "prop3";
         val sqlType = NotNullableVarchar;
         val getter = { x: Any => throw new Exception("Not used") }
       }, "test3")
-    val prop4 = new PropertyCondition(
+    val prop4 = new EqualsCondition(
       new ColumnDefinition[Any, String] {
         val name = "prop4";
         val sqlType = NotNullableVarchar;

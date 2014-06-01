@@ -19,9 +19,29 @@ trait Condition {
 	def setParameter(index:Int,ps:PreparedStatement):Int
 }
 
-class PropertyCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
+class EqualsCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
 	val precedence = 4
 	def sqlString() = c.name+"=?"
+	
+	def setParameter(index:Int, ps:PreparedStatement) = {
+	  c.sqlType.setParameter(index+1, value)(ps)
+	  index+1
+	}
+}
+
+class GreaterThanCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
+	val precedence = 4
+	def sqlString() = c.name+">?"
+	
+	def setParameter(index:Int, ps:PreparedStatement) = {
+	  c.sqlType.setParameter(index+1, value)(ps)
+	  index+1
+	}
+}
+
+class GreaterOrEqualsCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
+	val precedence = 4
+	def sqlString() = c.name+">=?"
 	
 	def setParameter(index:Int, ps:PreparedStatement) = {
 	  c.sqlType.setParameter(index+1, value)(ps)
