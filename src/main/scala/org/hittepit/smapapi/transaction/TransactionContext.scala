@@ -4,8 +4,12 @@ import scala.annotation.tailrec
 import java.sql.Connection
 
 trait TransactionMode
-object ReadOnly extends TransactionMode
-object Updatable extends TransactionMode
+object ReadOnly extends TransactionMode{
+  override def toString() = "read only"
+}
+object Updatable extends TransactionMode{
+  override def toString() = "read only"
+}
 
 object TransactionContext {
   def apply(con: Connection, ro: TransactionMode = ReadOnly) = new TransactionContext(None) with BaseTransactionContext { val connection = con; val readonly = ro == ReadOnly }

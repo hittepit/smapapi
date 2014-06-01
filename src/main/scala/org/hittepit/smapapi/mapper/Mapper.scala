@@ -5,6 +5,7 @@ import java.sql.ResultSet
 import java.sql.Connection
 import scala.annotation.tailrec
 import org.hittepit.smapapi.transaction.JdbcTransaction
+import org.hittepit.smapapi.transaction.TransactionContext
 
 class Projection
 
@@ -46,7 +47,13 @@ trait Mapper[E, I] { this: JdbcTransaction =>
     innerMap(Nil)
   }
 
-  def select(condition:Condition):E=throw new NotImplementedError
+  def select(condition:Condition):List[E]= readOnly{con =>
+    val sql = "select * from "+tableName+" where "+condition.sqlString
+    val ps = con.prepareStatement(sql)
+    condition.setParameter(0, ps)
+    val rs = ps.executeQuery()
+    mapResultSet(rs, map(_))
+  }
   
   def select(projection:Projection,condition:Condition)=throw new NotImplementedError
 

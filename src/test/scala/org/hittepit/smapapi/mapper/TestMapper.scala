@@ -11,10 +11,11 @@ import org.apache.commons.dbcp.BasicDataSource
 import org.hittepit.smapapi.transaction.TransactionManager
 import org.hittepit.smapapi.transaction.JdbcTransaction
 import org.hittepit.smapapi.test.JdbcTestTransaction
+import java.sql.Connection
 
 case class Book(id: Option[Int], isbn: String, title: String, author: Option[String])
 
-class BookMapper(val dataSource:DataSource) extends Mapper[Book, Option[Int]] with JdbcTransaction {
+class BookMapper(val transactionManager:TransactionManager) extends Mapper[Book, Option[Int]] with JdbcTransaction {
   val pk = id
   val tableName = "BOOK"
   def id = generatedPrimaryKey("id", NullableInteger, (b:Book) => b.id, (book:Book,id:Option[Int]) => new Book(id,book.isbn,book.title,book.author))
@@ -30,18 +31,22 @@ class DataSource extends BasicDataSource {
   val logger = LoggerFactory.getLogger("datasource")
   this.setDriverClassName("org.h2.Driver")
   this.setUsername("h2")
+  this.defaultAutoCommit = false
+  this.defaultTransactionIsolation = Connection.TRANSACTION_READ_COMMITTED
   this.setUrl("jdbc:h2:mem:test;MVCC=TRUE")
 }
 
 class TestMapper extends WordSpec with MustMatchers with JdbcTestTransaction {
-  val dataSource = new DataSource{}
-  val mapper = new BookMapper(dataSource)
+  val ds = new DataSource{}
+  val transactionManager = new TransactionManager{val dataSource = ds}
+  val mapper = new BookMapper(transactionManager)
 
   inTransaction{ connection =>
 	  var st = connection.createStatement
 	  st.addBatch("create table BOOK (id integer auto_increment,isbn varchar(10),title varchar(20),author varchar(20), PRIMARY KEY(id));")
 	  st.addBatch("insert into book (id,isbn,title,author) values (1,'12312','Test','toto');")
 	  st.addBatch("insert into book (id,isbn,title,author) values (2,'12313','Test2',null);")
+	  st.addBatch("insert into book (id,isbn,title,author) values (3,'12314','Test3','toto');")
 	  st.executeBatch()
   }
 
@@ -94,17 +99,6 @@ class TestMapper extends WordSpec with MustMatchers with JdbcTestTransaction {
           case Some(book) => fail
           case None =>
         }
-      }
-    }
-  }
-  
-  "The findAll method of a mapper" when {
-    "invoked" must {
-      "return all objects in the mapped table" in {
-        val bs = mapper.findAll
-        bs.size must be(2)
-        bs must contain(Book(Some(1),"12312","Test",Some("toto")))
-        bs must contain(Book(Some(2),"12313","Test2",None))
       }
     }
   }
@@ -162,6 +156,18 @@ class TestMapper extends WordSpec with MustMatchers with JdbcTestTransaction {
     }
   }
   
+  "The findAll method of a mapper" when {
+    "invoked" must {
+      "return all objects in the mapped table" in {
+        val bs = mapper.findAll
+        bs.size must be(3)
+        bs must contain(Book(Some(1),"12312","Test",Some("toto")))
+        bs must contain(Book(Some(2),"12313","Test2",None))
+        bs must contain(Book(Some(3),"12314","Test3",Some("toto")))
+      }
+    }
+  }
+  
   "The update method" when invoked{
     "with an object with an initialized id that exists in DB" must{
       "update the row in DB" in withRollback{con =>
@@ -191,6 +197,18 @@ class TestMapper extends WordSpec with MustMatchers with JdbcTestTransaction {
         val bookToUpdate = Book(None,"12312","Test1",Some("toto"))
         an [IllegalArgumentException] must be thrownBy mapper.update(bookToUpdate)
       }
+    }
+  }
+  
+  "The select method" when invoked {
+    "with a simple condition" must {
+      "return a list of objects fulfilling the condition" in {
+        val condition = new PropertyCondition(mapper.author,Some("toto"))
+        val books = mapper.select(condition)
+        books.size must be(2)
+        books must contain(Book(Some(1),"12312","Test",Some("toto")))
+        books must contain(Book(Some(3),"12314","Test3",Some("toto")))
+     }
     }
   }
 }

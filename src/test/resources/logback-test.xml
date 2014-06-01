@@ -6,7 +6,6 @@
 	</layout>
   </appender>
 
-	<logger name="org.springframework" level="INFO" />
   <root>
 	<level value="ERROR" />
 	<appender-ref ref="STDOUT" />

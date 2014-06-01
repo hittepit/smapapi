@@ -15,10 +15,15 @@ trait TransactionManager {
   def startNestedTransaction(ro: TransactionMode = ReadOnly): TransactionContext = {
     def createOrDecoreTransaction(parent: Option[TransactionContext], readOnly: TransactionMode) = parent match {
       case None =>
+          logger.debug("Creating new base transaction, readonly = {}", readOnly)
 		  val connection = dataSource.getConnection()
 		  connection.setAutoCommit(false)
 		  TransactionContext(connection, readOnly)
       case Some(parentTransaction) =>
+       	logger.debug("Creating new surrounding transaction, base transaction is readOnly = {}",parentTransaction.isReadonly)
+        if(logger.isDebugEnabled()){
+        	logger.debug("Base transaction is readOnly = {}",parentTransaction.isReadonly)
+        }
       	TransactionContext(parentTransaction)
     }
 
@@ -34,26 +39,34 @@ trait TransactionManager {
       case Some(transaction) =>
 		    transaction.parent match {
 		      case Some(t) =>
+		        logger.debug("Closing surrounding transaction")
 		        transactionThreadLocal.set(Some(t))
 		        Some(t)
 		      case None =>
+		        logger.debug("Closing base transaction")
 		        transactionThreadLocal.set(None)
 		        try {
 		          if (!transaction.isReadonly) {
 		            if (transaction.isRollback) {
+		              logger.info("Rollback transaction")
 		              transaction.getConnection.rollback()
 		            } else {
+		              logger.info("Commiting transaction")
 		              transaction.getConnection.commit()
 		            }
+		          } else {
+		            logger.info("Readonly transaction, no commit, not rollback")
 		          }
 		          None
 		        } catch {
 		          case e: Throwable =>
-		            logger.error("Exception caught whil closing the transaction", e)
+		            logger.error("Exception caught while closing the transaction", e)
 		            throw e
 		        } finally {
 		          try {
+		            logger.info("Closing connection...")
 		            transaction.getConnection.close()
+		            logger.info("Connection closed.")
 		          } catch {
 		            case e: Throwable =>
 		              logger.error("Excepton caught while closing the connection", e)
