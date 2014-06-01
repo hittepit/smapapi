@@ -15,7 +15,7 @@ class TestVarcharSqlType extends WordSpec with MustMatchers with MockitoSugar {
 	    "return a String with the value" in {
 		  implicit val rs = mock[ResultSet]
 		  when(rs.getString("test")).thenReturn("hello")
-		  val v = NotNullableVarchar.columnValue("test")
+		  val v = NotNullableVarchar.columnValue(Left("test"))
 		  v must be("hello")
 	    }
 	  }
@@ -25,7 +25,7 @@ class TestVarcharSqlType extends WordSpec with MustMatchers with MockitoSugar {
 		  when(rs.getString("test")).thenReturn(null)
 		  when(rs.wasNull()).thenReturn(true)
 		  
-		  an [NullValueException] must be thrownBy NotNullableVarchar.columnValue("test")
+		  an [NullValueException] must be thrownBy NotNullableVarchar.columnValue(Left("test"))
 	    }
 	  }
 	}
@@ -35,7 +35,7 @@ class TestVarcharSqlType extends WordSpec with MustMatchers with MockitoSugar {
 	    "return Some(String) with the value" in {
 		  implicit val rs = mock[ResultSet]
 		  when(rs.getString("test")).thenReturn("hello")
-		  val v = NullableVarchar.columnValue("test")
+		  val v = NullableVarchar.columnValue(Left("test"))
 		  v must be(Some("hello"))
 	    }
 	  }
@@ -45,7 +45,7 @@ class TestVarcharSqlType extends WordSpec with MustMatchers with MockitoSugar {
 		  when(rs.getString("test")).thenReturn(null)
 		  when(rs.wasNull()).thenReturn(true)
 		  
-		  val v = NullableVarchar.columnValue("test")
+		  val v = NullableVarchar.columnValue(Left("test"))
 		  v must be(None)
 	    }
 	  }

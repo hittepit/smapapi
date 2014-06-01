@@ -10,9 +10,9 @@ trait ColumnDefinition[E, P]{
 	
   def value(t: E): P = getter(t)
 
-  def value(implicit rs: ResultSet) = sqlType.columnValue(name)
+  def value(implicit rs: ResultSet) = sqlType.columnValue(Left(name))
   
-  def value(index:Int)(implicit rs: ResultSet) = sqlType.columnValue(index)
+  def value(index:Int)(implicit rs: ResultSet) = sqlType.columnValue(Right(index))
   
   def setValue(index:Int, entity:E)(implicit ps:PreparedStatement) = {
 	  val v = value(entity)
