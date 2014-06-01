@@ -58,43 +58,25 @@ trait Varchar extends Base[String]{
   def setColumnValue(index:Int,value:String)(implicit ps:PreparedStatement) = ps.setString(index,value)
 }
 
-object NullableVarchar extends Nullable[Option[String],String] with Varchar{
-}
+object NullableVarchar extends Nullable[Option[String],String] with Varchar
+object NotNullableVarchar extends NotNullable[String] with Varchar
 
-object NotNullableVarchar extends NotNullable[String] with Varchar{
-}
-
-
-object NotNullableInteger extends SqlType[Int]{
-  def columnValue(columnName:String)(implicit rs: ResultSet) = {
+trait Integer extends Base[Int]{
+  val typesql= Types.INTEGER
+  def getColumnValue(columnName:String)(implicit rs:ResultSet)={
     val v = rs.getInt(columnName)
     if(rs.wasNull) throw new NullValueException else v
   }
-  
-  def columnValue(index:Int)(implicit rs: ResultSet) = {
+  def getColumnValue(index:Int)(implicit rs:ResultSet)={
     val v = rs.getInt(index)
-    if(rs.wasNull) throw new NullValueException else v 
+    if(rs.wasNull) throw new NullValueException else v
   }
-  
-  def setParameter(index:Int,value:Int)(implicit ps:PreparedStatement) = ps.setInt(index, value)
+  def setColumnValue(index:Int,value:Int)(implicit ps:PreparedStatement) = ps.setInt(index,value)
 }
 
-object NullableInteger extends SqlType[Option[Int]]{
-  def columnValue(columnName:String)(implicit rs: ResultSet) = {
-    val v = rs.getInt(columnName)
-    if(rs.wasNull) None else Some(v) 
-  }
-  
-  def columnValue(index:Int)(implicit rs: ResultSet) = {
-    val v = rs.getInt(index)
-    if(rs.wasNull) None else Some(v) 
-  }
-  
-  def setParameter(index:Int,value:Option[Int])(implicit ps:PreparedStatement) = value match {
-    case Some(s) => ps.setInt(index, s)
-    case None => ps.setNull(index,Types.INTEGER)
-  }
-}
+object NotNullableInteger extends NotNullable[Int] with Integer
+
+object NullableInteger extends Nullable[Option[Int],Int] with Integer
 
 
 trait ColumnDefinition[E, P]{
