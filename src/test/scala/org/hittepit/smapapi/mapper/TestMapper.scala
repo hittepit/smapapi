@@ -24,7 +24,7 @@ class BookMapper(val transactionManager:TransactionManager) extends Mapper[Book,
   def title = column("title", NotNullableVarchar, (b:Book) => b.title)
   def author = column("author", NullableVarchar, (b:Book) => b.author)
   def price = column("price",NotNullableDouble,(b:Book) => b.price)
-  def map(implicit rs: ResultSet) = Book(id, isbn, title, author,price)
+  def mapping(implicit rs: ResultSet) = Book(id, isbn, title, author,price)
   val insertable = List(isbn, title, author,price)
   val updatable = List(isbn, title, author,price)
 }
