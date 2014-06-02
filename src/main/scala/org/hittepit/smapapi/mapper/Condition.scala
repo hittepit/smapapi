@@ -31,8 +31,8 @@ object Condition{
   def and(cs:Condition*):Condition = new AndCondition(cs)
   def or(cs:Condition*):Condition = new OrCondition(cs)
   def in[P](c:ColumnDefinition[_,P],values:P*):Condition = new InCondition(c,values)
-  def isNull[P](c:ColumnDefinition[_,P]):Condition = throw new NotImplementedError
-  def isNotNull[P](c:ColumnDefinition[_,P]):Condition = throw new NotImplementedError
+  def isNull(c:ColumnDefinition[_,_]):Condition = new IsNullCondition(c)
+  def isNotNull[P](c:ColumnDefinition[_,P]):Condition = new IsNotNullCondition(c)
   def between[P](c:ColumnDefinition[_,P],value1:P,value2:P):Condition = new BetweenCondition(c,value1,value2)
 }
 
@@ -130,6 +130,22 @@ class InCondition[P](c:ColumnDefinition[_,P],values:Seq[P]) extends Condition{
       				}
     newIndex
   }
+}
+
+class IsNullCondition(c:ColumnDefinition[_,_]) extends Condition {
+  val precedence =4
+  
+  def sqlString = c.name+" is null"
+  
+  def setParameter(index:Int,ps:PreparedStatement) = index
+}
+
+class IsNotNullCondition(c:ColumnDefinition[_,_]) extends Condition {
+  val precedence =4
+  
+  def sqlString = c.name+" is not null"
+  
+  def setParameter(index:Int,ps:PreparedStatement) = index
 }
 
 trait Combination extends Condition{
