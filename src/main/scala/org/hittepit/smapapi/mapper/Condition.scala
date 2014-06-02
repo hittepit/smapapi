@@ -30,10 +30,10 @@ object Condition{
   def not(c:Condition):Condition = new NotCondition(c)
   def and(cs:Condition*):Condition = new AndCondition(cs)
   def or(cs:Condition*):Condition = new OrCondition(cs)
-  def in[P](c:ColumnDefinition[_,P],value:P*):Condition = throw new NotImplementedError
+  def in[P](c:ColumnDefinition[_,P],values:P*):Condition = new InCondition(c,values)
   def isNull[P](c:ColumnDefinition[_,P]):Condition = throw new NotImplementedError
   def isNotNull[P](c:ColumnDefinition[_,P]):Condition = throw new NotImplementedError
-  def between[P](c:ColumnDefinition[_,P],value1:P,value2:P):Condition = throw new NotImplementedError
+  def between[P](c:ColumnDefinition[_,P],value1:P,value2:P):Condition = new BetweenCondition(c,value1,value2)
 }
 
 class EqualsCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
@@ -104,6 +104,32 @@ class LowerOrEqualsCondition[P](c:ColumnDefinition[_,P],value:P) extends Conditi
 	  c.sqlType.setParameter(index+1, value)(ps)
 	  index+1
 	}
+}
+
+class BetweenCondition[P](c:ColumnDefinition[_,P],v1:P,v2:P) extends Condition {
+  val precedence = 4
+  
+  def sqlString = c.name+" between ? and ?"
+  
+  def setParameter(index:Int, ps:PreparedStatement) = {
+    c.sqlType.setParameter(index+1, v1)(ps)
+    c.sqlType.setParameter(index+2, v2)(ps)
+    index+2
+  }
+}
+
+class InCondition[P](c:ColumnDefinition[_,P],values:Seq[P]) extends Condition{
+  val precedence = 4
+  
+  def sqlString = c.name+" in ("+(List.fill(values.size)("?")).mkString(",")+")"
+  
+  def setParameter(index:Int, ps:PreparedStatement) = {
+    var newIndex = index
+    values.foreach{v => newIndex = newIndex+1
+      				c.sqlType.setParameter(newIndex,v)(ps)
+      				}
+    newIndex
+  }
 }
 
 trait Combination extends Condition{
