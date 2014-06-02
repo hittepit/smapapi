@@ -12,6 +12,7 @@ import org.hittepit.smapapi.transaction.TransactionManager
 import org.hittepit.smapapi.transaction.JdbcTransaction
 import org.hittepit.smapapi.test.JdbcTestTransaction
 import java.sql.Connection
+import org.hittepit.smapapi.mapper.Condition._
 
 case class Book(id: Option[Int], isbn: String, title: String, author: Option[String], price:Double)
 
@@ -220,7 +221,8 @@ class TestMapper extends WordSpec with MustMatchers with JdbcTestTransaction {
     
     "with a compound condition" must {
       "return a list of objects fulfilling the condition" in {
-        val condition = new AndCondition(new EqualsCondition(mapper.author,Some("toto")),new GreaterThanCondition(mapper.price,3.0))
+        //Warning, eq used by ScalaTest matchers
+        val condition = and(Condition.eq(mapper.author,Some("toto")),gt(mapper.price,3.0))
         val books = mapper.select(condition)
         books.size must be(1)
         books must contain(Book(Some(1),"12312","Test",Some("toto"),10.40))

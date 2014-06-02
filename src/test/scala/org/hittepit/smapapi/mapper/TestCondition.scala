@@ -7,6 +7,7 @@ import java.sql.PreparedStatement
 
 import org.mockito.Mockito._
 import org.mockito.Matchers._
+import org.hittepit.smapapi.mapper.Condition._
 
 class TestCondition extends WordSpec with MustMatchers with MockitoSugar {
     val prop1 = new EqualsCondition(
@@ -33,7 +34,7 @@ class TestCondition extends WordSpec with MustMatchers with MockitoSugar {
         val sqlType = NotNullableVarchar;
         val getter = { x: Any => throw new Exception("Not used") }
       }, "test4")
-    val and = new AndCondition(prop1,prop2,prop3)
+    val and1 = and(prop1,prop2,prop3)
   trait TestEnvironment {
     val ps = mock[PreparedStatement]
   }
@@ -62,28 +63,28 @@ class TestCondition extends WordSpec with MustMatchers with MockitoSugar {
   "An 'and' condition defined with PropertyConditions " when {
     "creating the sql fragment" must {
       "return a sql fragment where property fragments are sepered with and" in {
-    	  val s = and.sqlString()
+    	  val s = and1.sqlString()
     	  s must be("prop1=? and prop2=? and prop3=?")
       }
     }
     
     "setting parameters" must {
       "set the values at right index" in new TestEnvironment {
-        and.setParameter(2, ps)
+        and1.setParameter(2, ps)
         verify(ps, times(1)).setString(3, "test1")
         verify(ps, times(1)).setString(4, "test2")
         verify(ps, times(1)).setString(5, "test3")
         verify(ps,times(3)).setString(anyInt,anyString)
       }
       "return the current index" in new TestEnvironment {
-        val i = and.setParameter(2, ps)
+        val i = and1.setParameter(2, ps)
         i must be(5)
       }
     }
   }
   
   "An 'and' condition defined with only one propertyCondition" when {
-    val fakeAnd = new AndCondition(prop1)
+    val fakeAnd = and(prop1)
     "creating the sql fragment" must {
       "only produce the propertyCondition sql fragment" in {
         val s = fakeAnd.sqlString()
@@ -107,30 +108,58 @@ class TestCondition extends WordSpec with MustMatchers with MockitoSugar {
   "A combination of 'and' and 'or'" when {
     "sqlString of and(p1, or(p2,p3))" must {
       "return p1 and (p2 or p3)" in new TestEnvironment{
-        val or = new OrCondition(prop2,prop3)
-        val and = new AndCondition(prop1,or)
-        and.sqlString must be("prop1=? and (prop2=? or prop3=?)")
+        val or1 = or(prop2,prop3)
+        val and1 = and(prop1,or1)
+        and1.sqlString must be("prop1=? and (prop2=? or prop3=?)")
       }
     }
     "sqlString of or(and(p1, p2), p3)" must {
       "return p1 and p2 or p3" in new TestEnvironment{
-        val and = new AndCondition(prop1,prop2)
-        val or = new OrCondition(and,prop3)
-        or.sqlString must be("prop1=? and prop2=? or prop3=?")
+        val and1 = and(prop1,prop2)
+        val or1 = or(and1,prop3)
+        or1.sqlString must be("prop1=? and prop2=? or prop3=?")
       }
     }
     "sqlString of and(or(p1, p2), p3)" must {
       "return (p1 or p2) and or p3" in new TestEnvironment{
-        val or = new OrCondition(prop1,prop2)
-        val and = new AndCondition(or,prop3)
-        and.sqlString must be("(prop1=? or prop2=?) and prop3=?")
+        val or1 = or(prop1,prop2)
+        val and1 = and(or1,prop3)
+        and1.sqlString must be("(prop1=? or prop2=?) and prop3=?")
       }
     }
     "sqlString of or(p1, and(p2, p3))" must {
       "return p1 or p2 and p3" in new TestEnvironment{
-        val and = new AndCondition(prop2,prop3)
-        val or = new OrCondition(prop1,and)
-        or.sqlString must be("prop1=? or prop2=? and prop3=?")
+        val and1 = and(prop2,prop3)
+        val or1 = or(prop1,and1)
+        or1.sqlString must be("prop1=? or prop2=? and prop3=?")
+      }
+    }
+  }
+  
+  "The not condition" when {
+    "not(p1=x)" must {
+      val c = Condition.not(prop1)
+      "return not p1=?" in {
+        c.sqlString() must be ("not prop1=?")
+      }
+      "set only one parameter and index+1" in new TestEnvironment{
+        val index = c.setParameter(3, ps)
+        verify(ps,times(1)).setString(4,"test1")
+        verify(ps,times(1)).setString(anyInt,anyString)
+        index must be(4)
+      }
+    }
+    "not(p1 and p2)" must {
+      val c = Condition.not(Condition.and(prop1,prop2))
+      "return not (p1=? and p2=?" in {
+        c.sqlString() must be("not (prop1=? and prop2=?)")
+      }
+      "set the two parameters and return index+2" in new TestEnvironment{
+        val index = c.setParameter(3, ps)
+        verify(ps,times(1)).setString(4, "test1")
+        verify(ps,times(1)).setString(5, "test2")
+        verify(ps,times(2)).setString(anyInt,anyString)
+        index must be(5)
       }
     }
   }

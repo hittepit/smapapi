@@ -19,9 +19,46 @@ trait Condition {
 	def setParameter(index:Int,ps:PreparedStatement):Int
 }
 
+object Condition{
+  def eq[P](c:ColumnDefinition[_,P],value:P) = new EqualsCondition(c,value)
+  def ne[P](c:ColumnDefinition[_,P],value:P):Condition = new NotEqualsCondition(c,value)
+  def gt[P](c:ColumnDefinition[_,P],value:P):Condition = new GreaterThanCondition(c,value)
+  def ge[P](c:ColumnDefinition[_,P],value:P):Condition = new GreaterOrEqualsCondition(c,value)
+  def lt[P](c:ColumnDefinition[_,P],value:P):Condition = new LowerThanCondition(c,value)
+  def le[P](c:ColumnDefinition[_,P],value:P):Condition = new LowerOrEqualsCondition(c,value)
+  def like[P](c:ColumnDefinition[_,P],value:P):Condition = new LikeCondition(c,value)
+  def not(c:Condition):Condition = new NotCondition(c)
+  def and(cs:Condition*):Condition = new AndCondition(cs)
+  def or(cs:Condition*):Condition = new OrCondition(cs)
+  def in[P](c:ColumnDefinition[_,P],value:P*):Condition = throw new NotImplementedError
+  def isNull[P](c:ColumnDefinition[_,P]):Condition = throw new NotImplementedError
+  def isNotNull[P](c:ColumnDefinition[_,P]):Condition = throw new NotImplementedError
+  def between[P](c:ColumnDefinition[_,P],value1:P,value2:P):Condition = throw new NotImplementedError
+}
+
 class EqualsCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
 	val precedence = 4
 	def sqlString() = c.name+"=?"
+	
+	def setParameter(index:Int, ps:PreparedStatement) = {
+	  c.sqlType.setParameter(index+1, value)(ps)
+	  index+1
+	}
+}
+
+class NotEqualsCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
+	val precedence = 4
+	def sqlString() = c.name+"<>?"
+	
+	def setParameter(index:Int, ps:PreparedStatement) = {
+	  c.sqlType.setParameter(index+1, value)(ps)
+	  index+1
+	}
+}
+
+class LikeCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
+	val precedence = 4
+	def sqlString() = c.name+" like ?"
 	
 	def setParameter(index:Int, ps:PreparedStatement) = {
 	  c.sqlType.setParameter(index+1, value)(ps)
@@ -49,6 +86,26 @@ class GreaterOrEqualsCondition[P](c:ColumnDefinition[_,P],value:P) extends Condi
 	}
 }
 
+class LowerThanCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
+	val precedence = 4
+	def sqlString() = c.name+"<?"
+	
+	def setParameter(index:Int, ps:PreparedStatement) = {
+	  c.sqlType.setParameter(index+1, value)(ps)
+	  index+1
+	}
+}
+
+class LowerOrEqualsCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
+	val precedence = 4
+	def sqlString() = c.name+"<=?"
+	
+	def setParameter(index:Int, ps:PreparedStatement) = {
+	  c.sqlType.setParameter(index+1, value)(ps)
+	  index+1
+	}
+}
+
 trait Combination extends Condition{
   val conditions:Seq[Condition]
   val operator:String
@@ -67,13 +124,21 @@ trait Combination extends Condition{
   }
 }
 
-class AndCondition(val conditions:Condition*) extends Combination {
+class NotCondition(condition:Condition) extends Combination {
+	val conditions = Seq(condition)
+	val precedence = 5
+	val operator = "not"
+	  
+	override def sqlString() = "not "+(if(condition.precedence > precedence) "("+condition.sqlString+")" else condition.sqlString)
+}
+
+class AndCondition(val conditions:Seq[Condition]) extends Combination {
 	val precedence = 6
 	val operator = "and"
 } 
 
 
-class OrCondition(val conditions:Condition*) extends Combination {
+class OrCondition(val conditions:Seq[Condition]) extends Combination {
 	val precedence = 7
 	val operator = "or"
 } 
