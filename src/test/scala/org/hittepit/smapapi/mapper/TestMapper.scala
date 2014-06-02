@@ -230,6 +230,26 @@ class TestMapper extends WordSpec with MustMatchers with JdbcTestTransaction wit
         books must contain(Book(Some(1),"12312","Test",Some("toto"),10.40))
       }
     }
+    
+    "with a projection, a condition and a mapper" must {
+      "return the list of mapped objects" in readOnly{con =>
+        val condition = and(Condition.like(mapper.title,"Test%"),gt(mapper.price,5.0))
+        val projection = Projection((Some("t"),mapper.title),(Some("a"),mapper.author))
+        val mapTuple:ResultSet => (String,Option[String]) = rs =>{
+          val title = rs.getString("t")
+          val author = {val a = rs.getString("a")
+            if(rs.wasNull()) None else Some(a)
+          }
+          (title,author)
+        }
+        
+        val tuples = mapper.select(Some(projection),Some(condition)) map (mapTuple)
+        
+        tuples.size must be(2)
+        tuples must contain("Test",Some("toto"))
+        tuples must contain("Test2",None)
+      }
+    }
   }
   
   "The ResultSetMapper" when{

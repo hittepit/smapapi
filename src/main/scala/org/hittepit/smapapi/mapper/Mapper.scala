@@ -61,6 +61,7 @@ trait Mapper[E, I] { this: JdbcTransaction =>
       case None => ""
       case Some(c) => " where "+c.sqlString
     })
+    logger.debug(sql)
     val ps = con.prepareStatement(sql)
     condition match {
       case Some(c) => c.setParameter(0, ps)
