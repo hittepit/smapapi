@@ -13,6 +13,8 @@ import org.hittepit.smapapi.transaction.JdbcTransaction
 import org.hittepit.smapapi.test.JdbcTestTransaction
 import java.sql.Connection
 import org.hittepit.smapapi.mapper.Condition._
+import org.scalatest.mock.MockitoSugar
+import org.mockito.Mockito._
 
 case class Book(id: Option[Int], isbn: String, title: String, author: Option[String], price:Double)
 
@@ -38,7 +40,7 @@ class DataSource extends BasicDataSource {
   this.setUrl("jdbc:h2:mem:test;MVCC=TRUE")
 }
 
-class TestMapper extends WordSpec with MustMatchers with JdbcTestTransaction {
+class TestMapper extends WordSpec with MustMatchers with JdbcTestTransaction with MockitoSugar{
   val ds = new DataSource{}
   val transactionManager = new TransactionManager{val dataSource = ds}
   val mapper = new BookMapper(transactionManager)
@@ -229,4 +231,19 @@ class TestMapper extends WordSpec with MustMatchers with JdbcTestTransaction {
       }
     }
   }
+  
+  "The ResultSetMapper" when{
+    "invoking map" must {
+      "return a collection in the right order" in {
+        val rs = mock[ResultSet]
+        when(rs.getInt(1)).thenReturn(1,2,3,4)
+        when(rs.next).thenReturn(true,true,true,true,false)
+        
+        val rm = new mapper.ResultSetMapper(rs)
+        val l = rm.map(rs => rs.getInt(1))
+        l must be(List(1,2,3,4))
+      }
+    }
+  }
+
 }

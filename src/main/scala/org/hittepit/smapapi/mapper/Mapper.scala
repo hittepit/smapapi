@@ -35,16 +35,16 @@ trait Mapper[E, I] { this: JdbcTransaction =>
     "update "+tableName+" set "+updatable.map(_.name+"=?").mkString(",")+" where "+pk.name+"=?"
   }
 
-  private def mapResultSet(rs: ResultSet, mapper: ResultSet => E): List[E] = {
-    @tailrec
-    def innerMap(acc: List[E]): List[E] = if (rs.next()) {
-      innerMap(mapper(rs) :: acc)
-    } else {
-      acc
-    }
-
-    innerMap(Nil)
-  }
+//  private def mapResultSet(rs: ResultSet, mapper: ResultSet => E): List[E] = {
+//    @tailrec
+//    def innerMap(acc: List[E]): List[E] = if (rs.next()) {
+//      innerMap(mapper(rs) :: acc)
+//    } else {
+//      acc
+//    }
+//
+//    innerMap(Nil)
+//  }
 
   def select(condition:Condition):List[E]= readOnly{con =>
     select(None,Some(condition)) map (mapping(_))
@@ -75,7 +75,7 @@ trait Mapper[E, I] { this: JdbcTransaction =>
   class ResultSetMapper(rs:ResultSet){
 	  def map[T](f:ResultSet => T):List[T]= {
 	    def innerMap(acc:List[T]):List[T] = if(rs.next()){
-	      innerMap(f(rs) :: acc)
+	      innerMap(acc:::List(f(rs)))
 	    } else {
 	      acc
 	    }
@@ -124,7 +124,7 @@ trait Mapper[E, I] { this: JdbcTransaction =>
 
   def findAll: List[E] = readOnly { connection =>
     val rs = connection.prepareStatement("select * from " + tableName).executeQuery
-    mapResultSet(rs, mapping(_))
+    new ResultSetMapper(rs). map(mapping(_))
   }
 
   def find(id: Any): Option[E] = readOnly { connection =>
@@ -132,7 +132,7 @@ trait Mapper[E, I] { this: JdbcTransaction =>
     val ps = connection.prepareStatement(sql)
     pk.sqlType.setParameter(1, Some(id).asInstanceOf[I])(ps) //TODO adpater à toutes les PK match sur generated
     val rs = ps.executeQuery()
-    mapResultSet(rs, mapping(_)) match {
+    new ResultSetMapper(rs). map(mapping(_)) match {
       case List(t) => Some(t)
       case Nil => None
       case _ => throw new Exception("PLus que une réponse") //TODO
