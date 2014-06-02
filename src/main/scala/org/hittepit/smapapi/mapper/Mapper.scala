@@ -7,9 +7,19 @@ import scala.annotation.tailrec
 import org.hittepit.smapapi.transaction.JdbcTransaction
 import org.hittepit.smapapi.transaction.TransactionContext
 
-class Projection
-
 trait Mapper[E, I] { this: JdbcTransaction =>
+  class ResultSetMapper(rs:ResultSet){
+	  def map[T](f:ResultSet => T):List[T]= {
+	    def innerMap(acc:List[T]):List[T] = if(rs.next()){
+	      innerMap(acc:::List(f(rs)))
+	    } else {
+	      acc
+	    }
+	    
+	    innerMap(Nil)
+	  }
+  }
+  
   val tableName: String
   val pk: PrimaryKeyColumnDefinition[E,I]
 
@@ -35,17 +45,6 @@ trait Mapper[E, I] { this: JdbcTransaction =>
     "update "+tableName+" set "+updatable.map(_.name+"=?").mkString(",")+" where "+pk.name+"=?"
   }
 
-//  private def mapResultSet(rs: ResultSet, mapper: ResultSet => E): List[E] = {
-//    @tailrec
-//    def innerMap(acc: List[E]): List[E] = if (rs.next()) {
-//      innerMap(mapper(rs) :: acc)
-//    } else {
-//      acc
-//    }
-//
-//    innerMap(Nil)
-//  }
-
   def select(condition:Condition):List[E]= readOnly{con =>
     select(None,Some(condition)) map (mapping(_))
   }
@@ -55,7 +54,7 @@ trait Mapper[E, I] { this: JdbcTransaction =>
     val sql = "select "+
     (projection match {
       case None => "*"
-      case Some(p) => throw new NotImplementedError
+      case Some(p) => p.sqlString
     }) +
     " from "+tableName+
     (condition match {
@@ -72,18 +71,6 @@ trait Mapper[E, I] { this: JdbcTransaction =>
 
   def mapping(implicit rs: ResultSet): E
 
-  class ResultSetMapper(rs:ResultSet){
-	  def map[T](f:ResultSet => T):List[T]= {
-	    def innerMap(acc:List[T]):List[T] = if(rs.next()){
-	      innerMap(acc:::List(f(rs)))
-	    } else {
-	      acc
-	    }
-	    
-	    innerMap(Nil)
-	  }
-  }
-  
   def insert(entity: E): E = inTransaction { connection =>
     implicit val ps = connection.prepareStatement(insertSqlString)
     insertable.zipWithIndex.foreach { _ match{
