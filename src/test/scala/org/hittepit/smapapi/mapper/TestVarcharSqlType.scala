@@ -15,7 +15,7 @@ class TestVarcharSqlType extends WordSpec with MustMatchers with MockitoSugar {
 	    "return a String with the value" in {
 		  implicit val rs = mock[ResultSet]
 		  when(rs.getString("test")).thenReturn("hello")
-		  val v = NotNullableVarchar.columnValue(Left("test"))
+		  val v = NotNullableVarchar.getColumnValue(rs,Left("test"))
 		  v must be("hello")
 	    }
 	  }
@@ -25,7 +25,7 @@ class TestVarcharSqlType extends WordSpec with MustMatchers with MockitoSugar {
 		  when(rs.getString("test")).thenReturn(null)
 		  when(rs.wasNull()).thenReturn(true)
 		  
-		  an [NullValueException] must be thrownBy NotNullableVarchar.columnValue(Left("test"))
+		  an [NullValueException] must be thrownBy NotNullableVarchar.getColumnValue(rs,Left("test"))
 	    }
 	  }
 	}
@@ -35,7 +35,7 @@ class TestVarcharSqlType extends WordSpec with MustMatchers with MockitoSugar {
 	    "return Some(String) with the value" in {
 		  implicit val rs = mock[ResultSet]
 		  when(rs.getString("test")).thenReturn("hello")
-		  val v = NullableVarchar.columnValue(Left("test"))
+		  val v = NullableVarchar.getColumnValue(rs,Left("test"))
 		  v must be(Some("hello"))
 	    }
 	  }
@@ -45,7 +45,7 @@ class TestVarcharSqlType extends WordSpec with MustMatchers with MockitoSugar {
 		  when(rs.getString("test")).thenReturn(null)
 		  when(rs.wasNull()).thenReturn(true)
 		  
-		  val v = NullableVarchar.columnValue(Left("test"))
+		  val v = NullableVarchar.getColumnValue(rs,Left("test"))
 		  v must be(None)
 	    }
 	  }
@@ -55,14 +55,14 @@ class TestVarcharSqlType extends WordSpec with MustMatchers with MockitoSugar {
 	  "receiving a Some(String) and a PreparedStatement" must {
 	    "set the string on the preparedStatement" in {
 	      implicit val ps = mock[PreparedStatement]
-	      NullableVarchar.setParameter(1, Some("hello"))
+	      NullableVarchar.setColumnValue(1, Some("hello"),ps)
 	      verify(ps).setString(1,"hello")
 	    }
 	  }
 	  "receiving None and a PreparedStatement" must {
 	    "set null on the PreparedStatement" in {
 	      implicit val ps = mock[PreparedStatement]
-	      NullableVarchar.setParameter(1, None)
+	      NullableVarchar.setColumnValue(1, None,ps)
 	      verify(ps).setNull(1,Types.VARCHAR)
 	    }
 	  }
@@ -72,7 +72,7 @@ class TestVarcharSqlType extends WordSpec with MustMatchers with MockitoSugar {
 	  "receiving a Some(String) and a PreparedStatement" must {
 	    "set the string on the preparedStatement" in {
 	      implicit val ps = mock[PreparedStatement]
-	      NotNullableVarchar.setParameter(1, "hello")
+	      NotNullableVarchar.setColumnValue(1, "hello",ps)
 	      verify(ps).setString(1,"hello")
 	    }
 	  }

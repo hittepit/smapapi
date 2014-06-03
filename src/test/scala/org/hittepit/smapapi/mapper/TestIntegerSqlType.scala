@@ -15,7 +15,7 @@ class TestIntegerSqlType extends WordSpec with MustMatchers with MockitoSugar{
 			  implicit val rs = mock[ResultSet]
 			  when(rs.getInt("test")).thenReturn(1)
 			  
-			  val v = NotNullableInteger.columnValue(Left("test"))
+			  val v = NotNullableInteger.getColumnValue(rs,Left("test"))
 			  v must be(1)
 	    }
 	  }
@@ -25,7 +25,7 @@ class TestIntegerSqlType extends WordSpec with MustMatchers with MockitoSugar{
 		  when(rs.getInt("test")).thenReturn(0)
 		  when(rs.wasNull()).thenReturn(true)
 		  
-		  an [NullValueException] must be thrownBy NotNullableInteger.columnValue(Left("test"))
+		  an [NullValueException] must be thrownBy NotNullableInteger.getColumnValue(rs,Left("test"))
 	    }
 	  }
 	}
@@ -36,7 +36,7 @@ class TestIntegerSqlType extends WordSpec with MustMatchers with MockitoSugar{
 			  implicit val rs = mock[ResultSet]
 			  when(rs.getInt("test")).thenReturn(1)
 			  
-			  val v = NullableInteger.columnValue(Left("test"))
+			  val v = NullableInteger.getColumnValue(rs,Left("test"))
 			  v must be(Some(1))
 	    }
 	  }
@@ -46,7 +46,7 @@ class TestIntegerSqlType extends WordSpec with MustMatchers with MockitoSugar{
 		  when(rs.getInt("test")).thenReturn(0)
 		  when(rs.wasNull()).thenReturn(true)
 			  
-		  val v = NullableInteger.columnValue(Left("test"))
+		  val v = NullableInteger.getColumnValue(rs,Left("test"))
 		  v must be(None)
 	    }
 	  }
@@ -56,14 +56,14 @@ class TestIntegerSqlType extends WordSpec with MustMatchers with MockitoSugar{
 	  "receiving a Some(Int) and a PreparedStatement" must {
 	    "set the int on the preparedStatement" in {
 	      implicit val ps = mock[PreparedStatement]
-	      NullableInteger.setParameter(1, Some(17))
+	      NullableInteger.setColumnValue(1, Some(17),ps)
 	      verify(ps).setInt(1,17)
 	    }
 	  }
 	  "receiving None and a PreparedStatement" must {
 	    "set null on the PreparedStatement" in {
 	      implicit val ps = mock[PreparedStatement]
-	      NullableInteger.setParameter(1, None)
+	      NullableInteger.setColumnValue(1, None,ps)
 	      verify(ps).setNull(1,Types.INTEGER)
 	    }
 	  }

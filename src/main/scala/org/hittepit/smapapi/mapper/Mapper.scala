@@ -118,7 +118,7 @@ trait Mapper[E, I] { this: JdbcTransaction =>
   def find(id: Any): Option[E] = readOnly { connection =>
     val sql = "select * from " + tableName + " where " + pk.name + " = ?"
     val ps = connection.prepareStatement(sql)
-    pk.sqlType.setParameter(1, Some(id).asInstanceOf[I])(ps) //TODO adpater à toutes les PK match sur generated
+    pk.sqlType.setColumnValue(1, Some(id).asInstanceOf[I],ps) //TODO adpater à toutes les PK match sur generated
     val rs = ps.executeQuery()
     new ResultSetMapper(rs). map(mapping(_)) match {
       case List(t) => Some(t)

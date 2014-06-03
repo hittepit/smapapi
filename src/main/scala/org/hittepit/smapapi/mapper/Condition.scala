@@ -41,7 +41,7 @@ class EqualsCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
 	def sqlString() = c.name+"=?"
 	
 	def setParameter(index:Int, ps:PreparedStatement) = {
-	  c.sqlType.setParameter(index+1, value)(ps)
+	  c.sqlType.setColumnValue(index+1, value,ps)
 	  index+1
 	}
 }
@@ -51,7 +51,7 @@ class NotEqualsCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
 	def sqlString() = c.name+"<>?"
 	
 	def setParameter(index:Int, ps:PreparedStatement) = {
-	  c.sqlType.setParameter(index+1, value)(ps)
+	  c.sqlType.setColumnValue(index+1, value,ps)
 	  index+1
 	}
 }
@@ -61,7 +61,7 @@ class LikeCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
 	def sqlString() = c.name+" like ?"
 	
 	def setParameter(index:Int, ps:PreparedStatement) = {
-	  c.sqlType.setParameter(index+1, value)(ps)
+	  c.sqlType.setColumnValue(index+1, value,ps)
 	  index+1
 	}
 }
@@ -71,7 +71,7 @@ class GreaterThanCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition
 	def sqlString() = c.name+">?"
 	
 	def setParameter(index:Int, ps:PreparedStatement) = {
-	  c.sqlType.setParameter(index+1, value)(ps)
+	  c.sqlType.setColumnValue(index+1, value,ps)
 	  index+1
 	}
 }
@@ -81,7 +81,7 @@ class GreaterOrEqualsCondition[P](c:ColumnDefinition[_,P],value:P) extends Condi
 	def sqlString() = c.name+">=?"
 	
 	def setParameter(index:Int, ps:PreparedStatement) = {
-	  c.sqlType.setParameter(index+1, value)(ps)
+	  c.sqlType.setColumnValue(index+1, value,ps)
 	  index+1
 	}
 }
@@ -91,7 +91,7 @@ class LowerThanCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
 	def sqlString() = c.name+"<?"
 	
 	def setParameter(index:Int, ps:PreparedStatement) = {
-	  c.sqlType.setParameter(index+1, value)(ps)
+	  c.sqlType.setColumnValue(index+1, value,ps)
 	  index+1
 	}
 }
@@ -101,7 +101,7 @@ class LowerOrEqualsCondition[P](c:ColumnDefinition[_,P],value:P) extends Conditi
 	def sqlString() = c.name+"<=?"
 	
 	def setParameter(index:Int, ps:PreparedStatement) = {
-	  c.sqlType.setParameter(index+1, value)(ps)
+	  c.sqlType.setColumnValue(index+1, value,ps)
 	  index+1
 	}
 }
@@ -112,8 +112,8 @@ class BetweenCondition[P](c:ColumnDefinition[_,P],v1:P,v2:P) extends Condition {
   def sqlString = c.name+" between ? and ?"
   
   def setParameter(index:Int, ps:PreparedStatement) = {
-    c.sqlType.setParameter(index+1, v1)(ps)
-    c.sqlType.setParameter(index+2, v2)(ps)
+    c.sqlType.setColumnValue(index+1, v1,ps)
+    c.sqlType.setColumnValue(index+2, v2,ps)
     index+2
   }
 }
@@ -126,7 +126,7 @@ class InCondition[P](c:ColumnDefinition[_,P],values:Seq[P]) extends Condition{
   def setParameter(index:Int, ps:PreparedStatement) = {
     var newIndex = index
     values.foreach{v => newIndex = newIndex+1
-      				c.sqlType.setParameter(newIndex,v)(ps)
+      				c.sqlType.setColumnValue(newIndex,v,ps)
       				}
     newIndex
   }
