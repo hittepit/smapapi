@@ -11,29 +11,13 @@ import org.hittepit.smapapi.mapper.Condition._
 
 class TestCondition extends WordSpec with MustMatchers with MockitoSugar {
   val prop1 = new EqualsCondition(
-    new ColumnDefinition[Any, String] {
-      val name = "prop1";
-      val sqlType = NotNullableVarchar;
-      val getter = { x: Any => throw new Exception("Not used") }
-    }, "test1")
+    new ColumnDefinition("prop1",NotNullableVarchar,{ x: Any => throw new Exception("Not used") }), "test1")
   val prop2 = new EqualsCondition(
-    new ColumnDefinition[Any, String] {
-      val name = "prop2";
-      val sqlType = NotNullableVarchar;
-      val getter = { x: Any => throw new Exception("Not used") }
-    }, "test2")
+    new ColumnDefinition("prop2",NotNullableVarchar,{ x: Any => throw new Exception("Not used") }), "test2")
   val prop3 = new EqualsCondition(
-    new ColumnDefinition[Any, String] {
-      val name = "prop3";
-      val sqlType = NotNullableVarchar;
-      val getter = { x: Any => throw new Exception("Not used") }
-    }, "test3")
+    new ColumnDefinition("prop3",NotNullableVarchar,{ x: Any => throw new Exception("Not used") }), "test3")
   val prop4 = new EqualsCondition(
-    new ColumnDefinition[Any, String] {
-      val name = "prop4";
-      val sqlType = NotNullableVarchar;
-      val getter = { x: Any => throw new Exception("Not used") }
-    }, "test4")
+    new ColumnDefinition("prop4",NotNullableVarchar,{ x: Any => throw new Exception("Not used") }), "test4")
   val and1 = and(prop1, prop2, prop3)
   trait TestEnvironment {
     val ps = mock[PreparedStatement]
@@ -165,11 +149,7 @@ class TestCondition extends WordSpec with MustMatchers with MockitoSugar {
   }
 
   "The in condition" when {
-    val cd = new ColumnDefinition[Any, String] {
-      val name = "prop1";
-      val sqlType = NotNullableVarchar;
-      val getter = { x: Any => throw new Exception("Not used") }
-    }
+    val cd = new ColumnDefinition("prop1",NotNullableVarchar,{ x: Any => throw new Exception("Not used") })
     "given a list of values" must {
       val c = Condition.in(cd, "test1", "test2", "test3", "test4")
       "generated prop in (v1,v2,v3...) sql string" in {

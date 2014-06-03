@@ -16,39 +16,7 @@ import org.hittepit.smapapi.mapper.Condition._
 import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito._
 
-case class Book(id: Option[Int], isbn: String, title: String, author: Option[String], price:Double)
-
-class BookMapper(val transactionManager:TransactionManager) extends Mapper[Book, Option[Int]] with JdbcTransaction {
-  val logger = LoggerFactory.getLogger(classOf[BookMapper])
-  val tableName = "BOOK"
-  val pk = generatedPrimaryKey("id", NullableInteger, (b:Book) => b.id, (book:Book,id:Option[Int]) => new Book(id,book.isbn,book.title,book.author,book.price))
-  val isbn = column("isbn", NotNullableVarchar, (b:Book) => b.isbn)
-  val title = column("title", NotNullableVarchar, (b:Book) => b.title)
-  val author = column("author", NullableVarchar, (b:Book) => b.author)
-  val price = column("price",NotNullableDouble,(b:Book) => b.price)
-  def mapping(implicit rs: ResultSet) = Book(pk, isbn, title, author,price)
-  val insertable = List(isbn, title, author,price)
-  val updatable = List(isbn, title, author,price)
-}
-
-class DataSource extends BasicDataSource {
-  val logger = LoggerFactory.getLogger("datasource")
-  this.setDriverClassName("org.h2.Driver")
-  this.setUsername("h2")
-  this.defaultAutoCommit = false
-  this.defaultTransactionIsolation = Connection.TRANSACTION_READ_COMMITTED
-  this.setUrl("jdbc:h2:mem:test;MVCC=TRUE")
-}
-
-class TestMapper extends WordSpec with MustMatchers with JdbcTestTransaction with MockitoSugar{
-  val ds = new DataSource{}
-  val logger = LoggerFactory.getLogger(classOf[TestMapper])
-  val transactionManager = new TransactionManager{
-    val logger = LoggerFactory.getLogger(classOf[TransactionManager])
-    val dataSource = ds
-  }
-  val mapper = new BookMapper(transactionManager)
-
+class TestMapper extends WordSpec with MustMatchers with JdbcTestTransaction with MockitoSugar with MockBookMapper{
   inTransaction{ connection =>
 	  var st = connection.createStatement
 	  st.addBatch("create table BOOK (id integer auto_increment,isbn varchar(10),title varchar(20),author varchar(20), price double, PRIMARY KEY(id));")

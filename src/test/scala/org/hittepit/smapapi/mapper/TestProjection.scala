@@ -4,26 +4,10 @@ import org.scalatest.WordSpec
 import org.scalatest.MustMatchers
 
 class TestProjection extends WordSpec with MustMatchers{
-	val c1 = new ColumnDefinition[Any, String] {
-      val name = "c1";
-      val sqlType = NotNullableVarchar;
-      val getter = { x: Any => throw new Exception("Not used") }
-    }
-	val c2 = new ColumnDefinition[Any, Option[String]] {
-      val name = "c2";
-      val sqlType = NullableVarchar;
-      val getter = { x: Any => throw new Exception("Not used") }
-    }
-	val c3 = new ColumnDefinition[Any, Int] {
-      val name = "c3";
-      val sqlType = NotNullableInteger;
-      val getter = { x: Any => throw new Exception("Not used") }
-    }
-	val c4 = new ColumnDefinition[Any, String] {
-      val name = "c4";
-      val sqlType = NotNullableVarchar;
-      val getter = { x: Any => throw new Exception("Not used") }
-    }
+	val c1 = new ColumnDefinition("c1",NotNullableVarchar,{ x: Any => throw new Exception("Not used") })
+	val c2 = new ColumnDefinition("c2",NotNullableVarchar,{ x: Any => throw new Exception("Not used") })
+	val c3 = new ColumnDefinition("c3",NotNullableVarchar,{ x: Any => throw new Exception("Not used") })
+	val c4 = new ColumnDefinition("c4",NotNullableVarchar,{ x: Any => throw new Exception("Not used") })
 	
 	"A projection" when {
 	  "created with a simple column" must {
