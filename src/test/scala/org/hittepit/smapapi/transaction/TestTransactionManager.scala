@@ -6,6 +6,7 @@ import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import javax.sql.DataSource
 import org.scalatest.MustMatchers
+import org.slf4j.LoggerFactory
 
 class TestTransactionManager extends WordSpec with MockitoSugar with MustMatchers{
   
@@ -13,7 +14,10 @@ class TestTransactionManager extends WordSpec with MockitoSugar with MustMatcher
 		val connection = mock[Connection]
 		val ds = mock[DataSource]
 		when(ds.getConnection()).thenReturn(connection)
-		val tm = new TransactionManager{val dataSource = ds}
+		val tm = new TransactionManager{
+		  val logger = LoggerFactory.getLogger(classOf[Transaction])
+		  val dataSource = ds
+		}
 	}
 	
 	"The transaction manager" when {

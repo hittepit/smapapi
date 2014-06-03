@@ -4,9 +4,10 @@ import org.hittepit.smapapi.transaction.JdbcTransaction
 import java.sql.Connection
 import org.hittepit.smapapi.transaction.Updatable
 import org.slf4j.LoggerFactory
+import org.slf4j.Logger
 
 trait JdbcTestTransaction extends JdbcTransaction{
-  override val logger = LoggerFactory.getLogger(classOf[JdbcTestTransaction])
+  val logger:Logger
   
   def withRollback[T](f: Connection => T): T = {
     var result: Option[T] = None
@@ -16,7 +17,7 @@ trait JdbcTestTransaction extends JdbcTransaction{
       transaction.setRollback
     } catch {
       case e: Throwable =>
-        logger.warn("Exception catched in execution. Mark transaction for rollback.", e)
+        logger.info("Exception catched in execution. Mark transaction for rollback.", e)
         transaction.setRollback
         throw e
     } finally {

@@ -1,12 +1,12 @@
 package org.hittepit.smapapi.transaction
 
 import org.slf4j.LoggerFactory
-
 import javax.sql.DataSource
+import org.slf4j.Logger
 
 trait TransactionManager {
   val dataSource:DataSource
-  val logger = LoggerFactory.getLogger(classOf[TransactionManager])
+  val logger:Logger
 
   private val transactionThreadLocal = new ThreadLocal[Option[TransactionContext]]
   transactionThreadLocal.set(None)

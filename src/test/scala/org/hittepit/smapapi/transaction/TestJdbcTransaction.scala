@@ -8,13 +8,20 @@ import javax.sql.DataSource
 import org.apache.tools.ant.taskdefs.JDBCTask
 import org.scalatest.MustMatchers
 import sun.reflect.generics.reflectiveObjects.NotImplementedException
+import org.slf4j.LoggerFactory
 
 class TestJdbcTransaction extends WordSpec with MockitoSugar with MustMatchers{
   trait TransactionalEnvironment{
     val connection = mock[Connection]
     val ds = mock[DataSource]
 	when(ds.getConnection()).thenReturn(connection)
-    val jdbcTransaction = new JdbcTransaction{val transactionManager=new TransactionManager{val dataSource = ds;}}
+    val jdbcTransaction = new JdbcTransaction{
+      val logger = LoggerFactory.getLogger(classOf[JdbcTransaction])
+      val transactionManager=new TransactionManager{
+    	  val logger = LoggerFactory.getLogger(classOf[TransactionManager])
+    	  val dataSource = ds;
+      }
+    }
   }
   
 	"The JdbcTransaction Manager" when {

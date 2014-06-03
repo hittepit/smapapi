@@ -19,6 +19,7 @@ import org.mockito.Mockito._
 case class Book(id: Option[Int], isbn: String, title: String, author: Option[String], price:Double)
 
 class BookMapper(val transactionManager:TransactionManager) extends Mapper[Book, Option[Int]] with JdbcTransaction {
+  val logger = LoggerFactory.getLogger(classOf[BookMapper])
   val tableName = "BOOK"
   val pk = generatedPrimaryKey("id", NullableInteger, (b:Book) => b.id, (book:Book,id:Option[Int]) => new Book(id,book.isbn,book.title,book.author,book.price))
   val isbn = column("isbn", NotNullableVarchar, (b:Book) => b.isbn)
@@ -41,7 +42,11 @@ class DataSource extends BasicDataSource {
 
 class TestMapper extends WordSpec with MustMatchers with JdbcTestTransaction with MockitoSugar{
   val ds = new DataSource{}
-  val transactionManager = new TransactionManager{val dataSource = ds}
+  val logger = LoggerFactory.getLogger(classOf[TestMapper])
+  val transactionManager = new TransactionManager{
+    val logger = LoggerFactory.getLogger(classOf[TransactionManager])
+    val dataSource = ds
+  }
   val mapper = new BookMapper(transactionManager)
 
   inTransaction{ connection =>
