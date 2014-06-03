@@ -19,14 +19,13 @@ import org.mockito.Mockito._
 case class Book(id: Option[Int], isbn: String, title: String, author: Option[String], price:Double)
 
 class BookMapper(val transactionManager:TransactionManager) extends Mapper[Book, Option[Int]] with JdbcTransaction {
-  val pk = id
   val tableName = "BOOK"
-  def id = generatedPrimaryKey("id", NullableInteger, (b:Book) => b.id, (book:Book,id:Option[Int]) => new Book(id,book.isbn,book.title,book.author,book.price))
-  def isbn = column("isbn", NotNullableVarchar, (b:Book) => b.isbn)
-  def title = column("title", NotNullableVarchar, (b:Book) => b.title)
-  def author = column("author", NullableVarchar, (b:Book) => b.author)
-  def price = column("price",NotNullableDouble,(b:Book) => b.price)
-  def mapping(implicit rs: ResultSet) = Book(id, isbn, title, author,price)
+  val pk = generatedPrimaryKey("id", NullableInteger, (b:Book) => b.id, (book:Book,id:Option[Int]) => new Book(id,book.isbn,book.title,book.author,book.price))
+  val isbn = column("isbn", NotNullableVarchar, (b:Book) => b.isbn)
+  val title = column("title", NotNullableVarchar, (b:Book) => b.title)
+  val author = column("author", NullableVarchar, (b:Book) => b.author)
+  val price = column("price",NotNullableDouble,(b:Book) => b.price)
+  def mapping(implicit rs: ResultSet) = Book(pk, isbn, title, author,price)
   val insertable = List(isbn, title, author,price)
   val updatable = List(isbn, title, author,price)
 }
