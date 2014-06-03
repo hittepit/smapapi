@@ -3,10 +3,16 @@ package org.hittepit.smapapi.mapper
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 
-trait ColumnDefinition[E, P]{
-	val name:String
+trait ColumnName {
+  val name:String
+}
+
+trait ColumnType[P]{
 	val sqlType:SqlType[P]
-	val getter: E => P
+}
+
+trait ColumnDefinition[E, P] extends ColumnType[P] with ColumnName{
+  val getter: E => P
 	
   def value(t: E): P = getter(t)
 

@@ -69,7 +69,7 @@ trait Mapper[E, I] { this: JdbcTransaction =>
     }
     new ResultSetMapper(ps.executeQuery())
   }
-
+  
   def mapping(implicit rs: ResultSet): E
 
   def insert(entity: E): E = inTransaction { connection =>
