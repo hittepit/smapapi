@@ -45,22 +45,26 @@ class TestProjection extends WordSpec with MustMatchers {
   "A count projection" when {
     "created without any parameters" must {
       "generate count(*)" in {
-        pending
+        val c = new CountProjection((None,None))
+        c.sqlString must be("count(*)")
       }
     }
     "created with a column name and no alias" must {
       "generate count(column)" in {
-        pending
+        val c = new CountProjection((None,Some("test")))
+        c.sqlString must be("count(test)")
       }
     }
     "created with a column name and an alias" must {
       "generate count(column) as alias" in {
-
+        val c = new CountProjection((Some("t"),Some("test")))
+        c.sqlString must be("count(test) as t")
       }
     }
     "created with no column name and an alias" must {
       "generate count(*) as alias" in {
-
+        val c = new CountProjection((Some("t"),None))
+        c.sqlString must be("count(*) as t")
       }
     }
     "created with a inner projection" must {

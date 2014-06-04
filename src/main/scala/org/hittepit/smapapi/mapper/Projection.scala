@@ -11,14 +11,15 @@ class PropertyProjection(property: (Option[String],String)) extends Projection{
   }
 }
 
-class CountProjection(property:Option[(Option[String],String)]) extends Projection{
+class CountProjection(property:(Option[String],Option[String])) extends Projection{
   def sqlString = property match {
-    case Some((alias,name)) => alias match {
-      case Some(a) => "count("+name+") as "+alias
-      case None => "count("+name+")"
-    }
-      
-    case None => "count(*)"
+    case (alias,name) => "count("+ (name match{
+      case Some(n) => n
+      case None => "*"
+    })+")"+(alias match {
+      case Some(a) => " as "+a
+      case None =>""
+    })
   }
 }
 

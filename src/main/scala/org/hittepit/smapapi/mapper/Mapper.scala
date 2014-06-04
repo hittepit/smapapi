@@ -55,7 +55,7 @@ trait Mapper[E, I] { this: JdbcTransaction =>
     select(None,Some(condition)) map (mapping(_))
   }
   
-  //TODO gérer les exception
+  //TODO gérer les exceptions?
   def select(projection:Option[Projection],condition:Option[Condition]):ResultSetMapper= readOnly{con =>
     val sql = "select "+
     (projection match {
