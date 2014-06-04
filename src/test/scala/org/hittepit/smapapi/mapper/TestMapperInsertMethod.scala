@@ -7,9 +7,13 @@ import org.scalatest.WordSpec
 import org.slf4j.LoggerFactory
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.BeforeAndAfter
+import org.hittepit.smapapi.transaction.TransactionManager
 
-class TestMapperInsertMethod extends WordSpec with MustMatchers with MockitoSugar with MockBookMapper with BeforeAndAfter with BeforeAndAfterAll{
+class TestMapperInsertMethod extends WordSpec with MustMatchers with MockitoSugar with JdbcTestTransaction with BeforeAndAfter {
   val logger = LoggerFactory.getLogger(classOf[TestMapperInsertMethod])
+  val ds = new DataSource{}
+  val transactionManager = new TransactionManager(ds)
+  val mapper = new BookMapper(transactionManager)
 
   before{
 	  inTransaction{ connection =>
@@ -29,11 +33,6 @@ class TestMapperInsertMethod extends WordSpec with MustMatchers with MockitoSuga
 	      st.addBatch("drop table BOOK;")
 		  st.executeBatch()
     }
-  }
-
-  override def afterAll(){
-    println("------> Closing Datasource")
-    ds.close()
   }
 
   def invoked = afterWord("invoked")

@@ -5,14 +5,13 @@ import org.scalatest.MustMatchers
 import org.slf4j.LoggerFactory
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.BeforeAndAfter
+import org.hittepit.smapapi.transaction.TransactionManager
+import org.scalatest.mock.MockitoSugar
 
-class TestColumnObject extends WordSpec with MustMatchers with MockBookMapper with BeforeAndAfterAll{
+class TestColumnObject extends WordSpec with MustMatchers with  MockitoSugar{
   val logger = LoggerFactory.getLogger(classOf[TestColumnObject])
+  val mapper = new BookMapper(mock[TransactionManager])
 
-  override def afterAll(){
-    ds.close()
-  }
-  
   "The Column:apply method" when{
     "invoked with a name and a SqlType" must {
       "return a initialzed ColumnDef" in {

@@ -30,9 +30,9 @@ class DataSource extends BasicDataSource {
   this.defaultTransactionIsolation = Connection.TRANSACTION_READ_COMMITTED
   this.setUrl("jdbc:h2:mem:test;MVCC=TRUE")
 }
-
-trait MockBookMapper extends JdbcTestTransaction{
-  val ds = new DataSource{}
-  val transactionManager = new TransactionManager(ds)
-  val mapper = new BookMapper(transactionManager)
-}
+//
+//trait MockBookMapper extends JdbcTestTransaction{
+//  val ds = new DataSource{}
+//  val transactionManager = new TransactionManager(ds)
+//  val mapper = new BookMapper(transactionManager)
+//}

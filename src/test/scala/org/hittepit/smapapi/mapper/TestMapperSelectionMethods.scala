@@ -9,9 +9,13 @@ import org.hittepit.smapapi.mapper.Condition._
 import java.sql.ResultSet
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.BeforeAndAfter
+import org.hittepit.smapapi.transaction.TransactionManager
 
-class TestMapperSelectionMethods extends WordSpec with MustMatchers with MockitoSugar with MockBookMapper with BeforeAndAfter with BeforeAndAfterAll{
+class TestMapperSelectionMethods extends WordSpec with MustMatchers with MockitoSugar with JdbcTestTransaction with BeforeAndAfter {
   val logger = LoggerFactory.getLogger(classOf[TestMapperSelectionMethods])
+  val ds = new DataSource{}
+  val transactionManager = new TransactionManager(ds)
+  val mapper = new BookMapper(transactionManager)
 
   before{
 	  inTransaction{ connection =>
@@ -31,11 +35,6 @@ class TestMapperSelectionMethods extends WordSpec with MustMatchers with Mockito
 	      st.addBatch("drop table BOOK;")
 		  st.executeBatch()
     }
-  }
-
-  override def afterAll(){
-    println("------> Closing Datasource")
-    ds.close()
   }
 
   def invoked = afterWord("invoked")

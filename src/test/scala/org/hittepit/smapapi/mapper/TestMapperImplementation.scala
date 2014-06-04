@@ -17,36 +17,30 @@ import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.BeforeAndAfter
 
-class TestMapperImplementation extends WordSpec with MustMatchers with MockitoSugar with MockBookMapper with BeforeAndAfter with BeforeAndAfterAll{
+class TestMapperImplementation extends WordSpec with MustMatchers with MockitoSugar with JdbcTestTransaction with BeforeAndAfter {
   val logger = LoggerFactory.getLogger(classOf[TestMapperImplementation])
+  val ds = new DataSource{}
+  val transactionManager = new TransactionManager(ds)
+  val mapper = new BookMapper(transactionManager)
 
   before{
 	  inTransaction{ connection =>
-		  println("--creating DB TestMapperImplementation")
 		  var st = connection.createStatement
 		  st.addBatch("create table BOOK (id integer auto_increment,isbn varchar(10),title varchar(20),author varchar(20), price double, PRIMARY KEY(id));")
 		  st.addBatch("insert into book (id,isbn,title,author,price) values (1,'12312','Test','toto',10.40);")
 		  st.addBatch("insert into book (id,isbn,title,author,price) values (2,'12313','Test2',null,5.60);")
 		  st.addBatch("insert into book (id,isbn,title,author,price) values (3,'12314','Test3','toto',2.25);")
 		  st.executeBatch()
-		  println("--DB created TestMapperImplementation")
 	  }
   }
   
   after{
     inTransaction{connection =>
-		  println("--droping DB TestMapperImplementation")
 		  var st = connection.createStatement
 		  st.addBatch("delete from book");
 	      st.addBatch("drop table BOOK;")
 		  st.executeBatch()
-		  println("--DB droped TestMapperImplementation")
     }
-  }
-
-  override def afterAll(){
-    println("------> Closing Datasource")
-    ds.close()
   }
 
   def invoked = afterWord("invoked")
