@@ -176,4 +176,38 @@ class TestCondition extends WordSpec with MustMatchers with MockitoSugar {
       }
     }
   }
+  
+  "A sql condition" when {
+    "used alone" must {
+      val c = sql("id = ? and toto > ? or a <> ?", List(Param(25,NotNullableInteger),Param("xxx",NotNullableVarchar),Param(Some(12.3),NullableDouble)))
+      "simply generate given sql" in new TestEnvironment {
+        c.sqlString() must be("id = ? and toto > ? or a <> ?")
+      }
+      
+      "set the parameters correctly" in new TestEnvironment {
+        val i = c.setParameter(3, ps)
+        verify(ps,times(1)).setInt(4, 25)
+        verify(ps,times(1)).setString(5, "xxx")
+        verify(ps,times(1)).setDouble(6, 12.3)
+        i must be(6)
+      }
+    }
+    
+    "combined with other conditions" must{
+      val c = and(prop1,sql("id = ? and toto > ? or a <> ?", List(Param(25,NotNullableInteger),Param("xxx",NotNullableVarchar),Param(Some(12.3),NullableDouble))),prop2)
+      "generate de correct sql" in new TestEnvironment {
+        c.sqlString() must be("prop1=? and (id = ? and toto > ? or a <> ?) and prop2=?")
+      }
+      
+      "set the paremeters correctly" in new TestEnvironment {
+        val i = c.setParameter(3, ps)
+        verify(ps,times(1)).setString(4, "test1")
+        verify(ps,times(1)).setInt(5, 25)
+        verify(ps,times(1)).setString(6, "xxx")
+        verify(ps,times(1)).setDouble(7, 12.3)
+        verify(ps,times(1)).setString(8, "test2")
+        i must be(8)
+      }
+    }
+  }
 }

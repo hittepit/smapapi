@@ -34,6 +34,24 @@ object Condition{
   def isNull(c:ColumnDefinition[_,_]):Condition = new IsNullCondition(c)
   def isNotNull[P](c:ColumnDefinition[_,P]):Condition = new IsNotNullCondition(c)
   def between[P](c:ColumnDefinition[_,P],value1:P,value2:P):Condition = new BetweenCondition(c,value1,value2)
+  def sql(sql:String, params:List[Param[_]]) = new SqlCondition(sql,params)
+}
+
+case class Param[T](value:T,sqlType:SqlType[T])
+
+class SqlCondition(sql:String, params:List[Param[_]]) extends Condition {
+  val precedence = 10
+  
+  def sqlString = sql
+  
+  def setParameter(index:Int, ps:PreparedStatement) = {
+    var i = index
+    params.foreach{_ match {
+      case Param(value,sqlType) => sqlType.setColumnValue(i+1,value,ps)
+    		  						i = i+1
+    } }
+    i
+  }
 }
 
 class EqualsCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
