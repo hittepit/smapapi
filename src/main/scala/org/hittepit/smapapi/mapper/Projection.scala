@@ -23,6 +23,10 @@ class CountProjection(property:(Option[String],Option[String])) extends Projecti
   }
 }
 
+class SqlProjection(sql:String) extends Projection{
+  def sqlString = sql
+}
+
 class ProjectionList(projections:Seq[Projection]) extends Projection{
   def sqlString = projections.map(_.sqlString).mkString(",")
 }
