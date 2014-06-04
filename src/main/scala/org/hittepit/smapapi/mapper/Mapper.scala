@@ -76,6 +76,16 @@ trait Mapper[E, I] { this: JdbcTransaction =>
     new ResultSetMapper(ps.executeQuery())
   }
   
+  def select(sql:String,params:List[Param[_]]): ResultSetMapper = readOnly {con =>
+    val ps = con.prepareStatement(sql)
+    params.zipWithIndex.foreach { _ match{
+      case (Param(value,sqlType),index) => sqlType.setColumnValue(index+1,value,ps)
+    }}
+    new ResultSetMapper(ps.executeQuery())
+  }
+  
+  def executeSql(sql:String,params:List[Param[_]]) = throw new NotImplementedError //TODO
+  
   def mapping(implicit rs: ResultSet): E
 
   def insert(entity: E): E = inTransaction { connection =>

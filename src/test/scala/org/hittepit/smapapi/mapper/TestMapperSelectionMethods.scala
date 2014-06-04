@@ -130,6 +130,18 @@ class TestMapperSelectionMethods extends WordSpec with MustMatchers with Mockito
         tuples must contain("Test2", None)
       }
     }
+    
+    "with a sql string, a list of params and a mapper" must {
+      "return a list of mapped objects" in readOnly {con =>
+        val select = mapper.select("select sum(price) as total, author from book where author like ? group by author",List(Param("to%",NotNullableVarchar)))
+        val tuples = select map { rs =>
+          (rs.getDouble("total"),rs.getString("author"))
+        }
+        
+        tuples.size must be(1)
+        tuples must contain((12.65,"toto"))
+      }
+    }
   }
 
 }
