@@ -14,10 +14,7 @@ class TestTransactionManager extends WordSpec with MockitoSugar with MustMatcher
 		val connection = mock[Connection]
 		val ds = mock[DataSource]
 		when(ds.getConnection()).thenReturn(connection)
-		val tm = new TransactionManager{
-		  val logger = LoggerFactory.getLogger(classOf[Transaction])
-		  val dataSource = ds
-		}
+		val tm = new TransactionManager(ds)
 	}
 	
 	"The transaction manager" when {

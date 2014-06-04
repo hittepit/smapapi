@@ -4,9 +4,9 @@ import org.slf4j.LoggerFactory
 import javax.sql.DataSource
 import org.slf4j.Logger
 
-trait TransactionManager {
-  val dataSource:DataSource
-  val logger:Logger
+class TransactionManager(ds:DataSource) {
+  val dataSource:DataSource = ds
+  val logger:Logger = LoggerFactory.getLogger(classOf[TransactionManager])
 
   private val transactionThreadLocal = new ThreadLocal[Option[TransactionContext]]
   transactionThreadLocal.set(None)

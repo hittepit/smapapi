@@ -2,9 +2,17 @@ package org.hittepit.smapapi.mapper
 
 import org.scalatest.WordSpec
 import org.scalatest.MustMatchers
+import org.slf4j.LoggerFactory
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.BeforeAndAfter
 
-class TestColumnObject extends WordSpec with MustMatchers with MockBookMapper{
+class TestColumnObject extends WordSpec with MustMatchers with MockBookMapper with BeforeAndAfterAll{
+  val logger = LoggerFactory.getLogger(classOf[TestColumnObject])
 
+  override def afterAll(){
+    ds.close()
+  }
+  
   "The Column:apply method" when{
     "invoked with a name and a SqlType" must {
       "return a initialzed ColumnDef" in {

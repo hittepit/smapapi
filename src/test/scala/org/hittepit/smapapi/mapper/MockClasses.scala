@@ -6,6 +6,7 @@ import org.apache.commons.dbcp.BasicDataSource
 import java.sql.ResultSet
 import org.slf4j.LoggerFactory
 import java.sql.Connection
+import org.hittepit.smapapi.test.JdbcTestTransaction
 
 case class Book(id: Option[Int], isbn: String, title: String, author: Option[String], price:Double)
 
@@ -23,7 +24,6 @@ class BookMapper(val transactionManager:TransactionManager) extends Mapper[Book,
 }
 
 class DataSource extends BasicDataSource {
-  val logger = LoggerFactory.getLogger("datasource")
   this.setDriverClassName("org.h2.Driver")
   this.setUsername("h2")
   this.defaultAutoCommit = false
@@ -31,12 +31,8 @@ class DataSource extends BasicDataSource {
   this.setUrl("jdbc:h2:mem:test;MVCC=TRUE")
 }
 
-trait MockBookMapper{
+trait MockBookMapper extends JdbcTestTransaction{
   val ds = new DataSource{}
-  val logger = LoggerFactory.getLogger(classOf[TestMapper])
-  val transactionManager = new TransactionManager{
-    val logger = LoggerFactory.getLogger(classOf[TransactionManager])
-    val dataSource = ds
-  }
+  val transactionManager = new TransactionManager(ds)
   val mapper = new BookMapper(transactionManager)
 }
