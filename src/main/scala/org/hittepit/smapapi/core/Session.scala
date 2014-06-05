@@ -45,24 +45,27 @@ class Session(val connection:Connection) {
 	  case _ => throw new Exception("More than one result") //TODO exception 
 	}
 	
-	def insert(sql:String, params:List[Param[_]], generatedColumns:List[(String,SqlType[_])]) = {
+	def insert(sql:String, params:List[Param[_]], generatedColumns:List[(String,SqlType[_])]):Map[String,Any] = {
+	  generatedColumns.map(_._1).toArray.foreach(println(_))
 	  val ps = connection.prepareStatement(sql,generatedColumns.map(_._1).toArray)
 	  
 	  params.zipWithIndex.foreach{_ match{
 	    case (param:Param[_],index) => param.sqlType.setColumnValue(index+1,param.value,ps)
 	  }}
 	  
-	  ps.executeQuery()
+	  ps.executeUpdate()
 	  
 	  val queryResult = new QueryResult(ps.getGeneratedKeys())
 	  
+	  println("--------> "+queryResult.rs.getMetaData().getColumnCount())
+	  
 	  queryResult.map{row =>
-		  def innerMap(columns:List[(String,SqlType[_])],acc:Map[String,Any]):Map[String,Any] = columns match {
+		  def innerMap(columns:List[((String,SqlType[_]),Int)],acc:Map[String,Any]):Map[String,Any] = columns match {
 		    case Nil => acc
-		    case c::cs => innerMap(cs, acc + (c._1 -> row.getColumnValue(c._1, c._2)))
+		    case c::cs => innerMap(cs, acc + (c._1._1 -> row.getColumnValue(c._2+1, c._1._2)))
 		  } 
 	    
-		  innerMap(generatedColumns,Map())
+		  innerMap(generatedColumns.zipWithIndex,Map[String,Any]())
 	  } match {
 	    case List(m) => m
 	    case List() => Map()
