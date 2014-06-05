@@ -6,6 +6,7 @@ import java.sql.Connection
 import scala.annotation.tailrec
 import org.hittepit.smapapi.transaction.JdbcTransaction
 import org.hittepit.smapapi.transaction.TransactionContext
+import org.hittepit.smapapi.core.Param
 
 trait Mapper[E, I] { this: JdbcTransaction =>
   class ResultSetMapper(rs:ResultSet){

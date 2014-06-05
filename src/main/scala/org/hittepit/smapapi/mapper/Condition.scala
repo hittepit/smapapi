@@ -1,6 +1,7 @@
 package org.hittepit.smapapi.mapper
 
 import java.sql.PreparedStatement
+import org.hittepit.smapapi.core.Param
 
 /*
 Oracle
@@ -36,8 +37,6 @@ object Condition{
   def between[P](c:ColumnDefinition[_,P],value1:P,value2:P):Condition = new BetweenCondition(c,value1,value2)
   def sql(sql:String, params:List[Param[_]]) = new SqlCondition(sql,params)
 }
-
-case class Param[T](value:T,sqlType:SqlType[T])
 
 class SqlCondition(sql:String, params:List[Param[_]]) extends Condition {
   val precedence = 10

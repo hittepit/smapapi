@@ -4,10 +4,10 @@ import org.scalatest.WordSpec
 import org.scalatest.MustMatchers
 import org.scalatest.mock.MockitoSugar
 import java.sql.PreparedStatement
-
 import org.mockito.Mockito._
 import org.mockito.Matchers._
 import org.hittepit.smapapi.mapper.Condition._
+import org.hittepit.smapapi.core.Param
 
 class TestCondition extends WordSpec with MustMatchers with MockitoSugar {
   val prop1 = new EqualsCondition(
