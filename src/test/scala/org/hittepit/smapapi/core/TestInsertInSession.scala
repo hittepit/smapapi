@@ -48,7 +48,7 @@ class TestInsertInSession extends WordSpec with BeforeAndAfter with MustMatchers
         val connection = ds.getConnection()
         val session = new Session(connection)
         
-        val valueGenerated = session.insert("insert into TEST (name) values (?)",List(Param("toto",NotNullableVarchar)),Some(("id",NotNullableInteger)))
+        val valueGenerated = session.insert("insert into TEST (name) values (?)",List(Param("toto",NotNullableVarchar)),Column("id",NotNullableInteger))
         
         connection.commit
         connection.close
@@ -60,7 +60,7 @@ class TestInsertInSession extends WordSpec with BeforeAndAfter with MustMatchers
         val connection = ds.getConnection()
         val session = new Session(connection)
         
-        val valueGenerated = session.insert("insert into TEST (name) values (?)",List(Param("hello",NotNullableVarchar)),Some(("id",NotNullableInteger)))
+        val valueGenerated = session.insert("insert into TEST (name) values (?)",List(Param("hello",NotNullableVarchar)),Column("id",NotNullableInteger))
         
         connection.commit
   
