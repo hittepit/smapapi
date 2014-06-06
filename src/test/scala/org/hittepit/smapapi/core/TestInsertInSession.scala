@@ -43,8 +43,8 @@ class TestInsertInSession extends WordSpec with BeforeAndAfter with MustMatchers
   }
 
   "The insert method" when {
-    "called for auto-generated values" must {
-      "return a value" in {
+    "called with auto-generated id" must {
+      "return the value of the generated id" in {
         val connection = ds.getConnection()
         val session = new Session(connection)
         
@@ -56,7 +56,7 @@ class TestInsertInSession extends WordSpec with BeforeAndAfter with MustMatchers
         valueGenerated must be('defined)
       }
       
-      "do the insertion and return the value of the id" in {
+      "insert the data in db" in {
         val connection = ds.getConnection()
         val session = new Session(connection)
         
@@ -76,6 +76,47 @@ class TestInsertInSession extends WordSpec with BeforeAndAfter with MustMatchers
         rs.wasNull must be(false)
         connection.close
       }
+    }
+    "called without auto-generated id" must {
+      "return None" in {
+        pending
+      }
+      "insert the data in DB" in {
+        pending
+      }
+    }
+  }
+  
+  "The execute method" when {
+    "called with an update" must {
+      "update the concerned rows" in {
+        pending
+      }
+      "return the number of affected rows" in {
+        pending
+      } 
+      "return 0 if no row was affacted" in {
+        pending
+      }
+    }
+    "called with an delete" must {
+      "delete the concerned rows" in {
+        pending
+      }
+      "return the number of affected rows" in {
+        pending
+      } 
+      "return 0 if no row was affacted" in {
+        pending
+      }
+    }
+    "called with an insert" must {
+      "insert a new row" in {
+        pending
+      }
+      "return the number of affected rows" in {
+        pending
+      } 
     }
   }
 

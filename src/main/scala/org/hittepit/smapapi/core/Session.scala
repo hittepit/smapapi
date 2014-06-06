@@ -95,4 +95,14 @@ class Session(val connection: Connection) {
       case None => None
     }
   }
+  
+  def execute(sql:String, params:List[Param[_]]):Int = {
+    val ps = connection.prepareStatement(sql)
+    params.zipWithIndex.foreach {
+      _ match {
+        case (param: Param[_], index) => param.sqlType.setColumnValue(index + 1, param.value, ps)
+      }
+    }
+    ps.executeUpdate()
+  }
 }
