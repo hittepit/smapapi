@@ -4,11 +4,7 @@ import org.apache.commons.dbcp.BasicDataSource
 import java.sql.Connection
 import org.scalatest.WordSpec
 import org.scalatest.BeforeAndAfter
-import org.hittepit.smapapi.mapper.NotNullableDouble
-import org.hittepit.smapapi.mapper.NotNullableVarchar
-import org.hittepit.smapapi.mapper.NullableVarchar
 import org.scalatest.MustMatchers
-import org.hittepit.smapapi.mapper.NotNullableInteger
 
 class TestSelectionsInSession extends WordSpec with BeforeAndAfter with MustMatchers{
   class DataSource extends BasicDataSource {

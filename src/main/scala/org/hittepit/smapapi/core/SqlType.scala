@@ -1,12 +1,9 @@
-package org.hittepit.smapapi.mapper
+package org.hittepit.smapapi.core
 
 import java.sql.ResultSet
 import java.sql.PreparedStatement
 import java.sql.Types
-import scala.language.higherKinds
-import scala.util.Try
-import scala.util.Success
-import scala.util.Failure
+import org.hittepit.smapapi.mapper.NullValueException
 trait Sql {
   type ColumnGetter[T] = ((ResultSet, Int) => T, (ResultSet, String) => T)
   type ColumnSetter[T] = ((PreparedStatement, Int, T) => Unit, Int)
@@ -85,11 +82,6 @@ object NotNullableDouble extends SqlType[Double] {
   val getColumnValue = getNotNullableColumn(getDoubleColumn)(_, _)
   val setColumnValue = setNotNullableColumn(setDoubleColumn)(_, _, _)
 }
-
-//trait SqlType[T]{
-//  def columnValue(column:Either[String,Int])(implicit rs: ResultSet):T
-//  def setParameter(index:Int,value:T)(implicit ps:PreparedStatement):Unit
-//}
 //
 //trait Base [T] {
 //  def get(name:String)(implicit rs:ResultSet):T

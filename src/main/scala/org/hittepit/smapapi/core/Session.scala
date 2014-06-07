@@ -2,7 +2,6 @@ package org.hittepit.smapapi.core
 
 import java.sql.Connection
 import java.sql.ResultSet
-import org.hittepit.smapapi.mapper.SqlType
 import java.sql.ResultSetMetaData
 import scala.collection.mutable.ArraySeq
 

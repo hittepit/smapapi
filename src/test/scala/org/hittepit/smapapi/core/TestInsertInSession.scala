@@ -5,9 +5,6 @@ import org.scalatest.MustMatchers
 import org.scalatest.WordSpec
 import org.apache.commons.dbcp.BasicDataSource
 import java.sql.Connection
-import org.hittepit.smapapi.mapper.NotNullableVarchar
-import org.hittepit.smapapi.mapper.NullableInteger
-import org.hittepit.smapapi.mapper.NotNullableInteger
 
 class TestInsertInSession extends WordSpec with BeforeAndAfter with MustMatchers {
   class DataSource extends BasicDataSource {

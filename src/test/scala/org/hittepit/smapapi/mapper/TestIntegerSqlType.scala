@@ -7,6 +7,8 @@ import java.sql.ResultSet
 import org.mockito.Mockito._
 import java.sql.PreparedStatement
 import java.sql.Types
+import org.hittepit.smapapi.core.NullableInteger
+import org.hittepit.smapapi.core.NotNullableInteger
 
 class TestIntegerSqlType extends WordSpec with MustMatchers with MockitoSugar{
 	"The columnValue method of a  NotNullableInteger" when {

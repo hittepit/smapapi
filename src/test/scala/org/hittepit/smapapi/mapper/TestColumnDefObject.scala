@@ -8,6 +8,7 @@ import org.scalatest.BeforeAndAfter
 import org.hittepit.smapapi.transaction.TransactionManager
 import org.scalatest.mock.MockitoSugar
 import org.hittepit.smapapi.core.Column
+import org.hittepit.smapapi.core.NotNullableVarchar
 
 class TestColumnDefObject extends WordSpec with MustMatchers with  MockitoSugar{
   val logger = LoggerFactory.getLogger(classOf[TestColumnDefObject])

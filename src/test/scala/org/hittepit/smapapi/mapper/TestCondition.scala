@@ -8,6 +8,7 @@ import org.mockito.Mockito._
 import org.mockito.Matchers._
 import org.hittepit.smapapi.mapper.Condition._
 import org.hittepit.smapapi.core.Param
+import org.hittepit.smapapi.core.NotNullableVarchar
 
 class TestCondition extends WordSpec with MustMatchers with MockitoSugar {
   val prop1 = new EqualsCondition(

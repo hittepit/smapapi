@@ -8,6 +8,8 @@ import java.sql.ResultSet
 import org.scalatest.GivenWhenThen
 import java.sql.PreparedStatement
 import java.sql.Types
+import org.hittepit.smapapi.core.NullableVarchar
+import org.hittepit.smapapi.core.NotNullableVarchar
 
 class TestVarcharSqlType extends WordSpec with MustMatchers with MockitoSugar {
 	"The columnValue method of a NotNullableVarchar" when {

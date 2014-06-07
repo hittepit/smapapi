@@ -9,6 +9,10 @@ import java.sql.Connection
 import org.hittepit.smapapi.test.JdbcTestTransaction
 import org.hittepit.smapapi.core.Column
 import org.hittepit.smapapi.core.Row
+import org.hittepit.smapapi.core.NullableVarchar
+import org.hittepit.smapapi.core.NullableInteger
+import org.hittepit.smapapi.core.NotNullableVarchar
+import org.hittepit.smapapi.core.NotNullableDouble
 
 case class Book(id: Option[Int], isbn: String, title: String, author: Option[String], price:Double)
 

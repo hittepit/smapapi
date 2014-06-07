@@ -8,6 +8,7 @@ import org.hittepit.smapapi.core.Param
 import org.hittepit.smapapi.core.QueryResult
 import org.hittepit.smapapi.core.Row
 import org.hittepit.smapapi.core.Column
+import org.hittepit.smapapi.core.SqlType
 
 trait Mapper[E, I] { this: JdbcTransaction =>
   object PrimaryKey{

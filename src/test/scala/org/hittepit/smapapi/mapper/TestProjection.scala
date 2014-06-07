@@ -2,6 +2,7 @@ package org.hittepit.smapapi.mapper
 
 import org.scalatest.WordSpec
 import org.scalatest.MustMatchers
+import org.hittepit.smapapi.core.NotNullableVarchar
 
 class TestProjection extends WordSpec with MustMatchers {
   val c1 = new ColumnDefinition("c1", NotNullableVarchar, { x: Any => throw new Exception("Not used") })
