@@ -16,8 +16,8 @@ class TestMapperUpdateMethod extends WordSpec with MustMatchers with MockitoSuga
   val mapper = new BookMapper(transactionManager)
 
   before{
-	  inTransaction{ connection =>
-		  var st = connection.createStatement
+	  inTransaction{ session =>
+		  var st = session.connection.createStatement
 		  st.addBatch("create table BOOK (id integer auto_increment,isbn varchar(10),title varchar(20),author varchar(20), price double, PRIMARY KEY(id));")
 		  st.addBatch("insert into book (id,isbn,title,author,price) values (1,'12312','Test','toto',10.40);")
 		  st.addBatch("insert into book (id,isbn,title,author,price) values (2,'12313','Test2',null,5.60);")
@@ -27,8 +27,8 @@ class TestMapperUpdateMethod extends WordSpec with MustMatchers with MockitoSuga
   }
   
   after{
-    inTransaction{connection =>
-		  var st = connection.createStatement
+    inTransaction{session =>
+		  var st = session.connection.createStatement
 		  st.addBatch("delete from book");
 	      st.addBatch("drop table BOOK;")
 		  st.executeBatch()
@@ -39,11 +39,11 @@ class TestMapperUpdateMethod extends WordSpec with MustMatchers with MockitoSuga
 
   "The update method" when invoked{
     "with an object with an initialized id that exists in DB" must{
-      "update the row in DB" in withRollback{con =>
+      "update the row in DB" in withRollback{session =>
         val bookToUpdate = Book(Some(1),"12312","Test1",Some("toto"),7.5)
         mapper.update(bookToUpdate)
         
-        val ps = con.prepareStatement("select * from BOOK where id=?")
+        val ps = session.connection.prepareStatement("select * from BOOK where id=?")
         ps.setInt(1, 1)
         val rs = ps.executeQuery()
         rs.next must be(true)
@@ -56,7 +56,7 @@ class TestMapperUpdateMethod extends WordSpec with MustMatchers with MockitoSuga
     }
     
     "with an object with an initialized id that does not exist in DB" must{
-      "throws an IllegalArgumentException" in withRollback{con =>
+      "throws an IllegalArgumentException" in withRollback{session =>
         val bookToUpdate = Book(Some(50),"12312","Test1",Some("toto"),7.5)
         an [IllegalArgumentException] must be thrownBy mapper.update(bookToUpdate)
         //TODO chek no update made
@@ -64,7 +64,7 @@ class TestMapperUpdateMethod extends WordSpec with MustMatchers with MockitoSuga
     }
     
     "with an object without id" must{
-      "throw an IllegalArgumentException" in withRollback{con =>
+      "throw an IllegalArgumentException" in withRollback{session =>
         val bookToUpdate = Book(None,"12312","Test1",Some("toto"),5.6)
         an [IllegalArgumentException] must be thrownBy mapper.update(bookToUpdate)
       }

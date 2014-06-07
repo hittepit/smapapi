@@ -3,6 +3,7 @@ package org.hittepit.smapapi.transaction
 import org.slf4j.LoggerFactory
 import javax.sql.DataSource
 import org.slf4j.Logger
+import org.hittepit.smapapi.core.Session
 
 class TransactionManager(ds:DataSource) {
   val dataSource:DataSource = ds
@@ -18,7 +19,8 @@ class TransactionManager(ds:DataSource) {
           logger.debug("Creating new base transaction, readonly = {}", readOnly)
 		  val connection = dataSource.getConnection()
 		  connection.setAutoCommit(false)
-		  TransactionContext(connection, readOnly)
+		  val session = new Session(connection)
+		  TransactionContext(session, readOnly)
       case Some(parentTransaction) =>
        	logger.debug("Creating new surrounding transaction, base transaction is readOnly = {}",parentTransaction.isReadonly)
         if(logger.isDebugEnabled()){
@@ -49,10 +51,10 @@ class TransactionManager(ds:DataSource) {
 		          if (!transaction.isReadonly) {
 		            if (transaction.isRollback) {
 		              logger.info("Rollback transaction")
-		              transaction.getConnection.rollback()
+		              transaction.getSession.rollback()
 		            } else {
 		              logger.info("Commiting transaction")
-		              transaction.getConnection.commit()
+		              transaction.getSession.commit()
 		            }
 		          } else {
 		            logger.info("Readonly transaction, no commit, not rollback")
@@ -65,7 +67,7 @@ class TransactionManager(ds:DataSource) {
 		        } finally {
 		          try {
 		            logger.info("Closing connection...")
-		            transaction.getConnection.close()
+		            transaction.getSession.close()
 		            logger.info("Connection closed.")
 		          } catch {
 		            case e: Throwable =>

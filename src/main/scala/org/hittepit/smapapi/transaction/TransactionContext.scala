@@ -2,6 +2,7 @@ package org.hittepit.smapapi.transaction
 
 import scala.annotation.tailrec
 import java.sql.Connection
+import org.hittepit.smapapi.core.Session
 
 trait TransactionMode
 object ReadOnly extends TransactionMode{
@@ -12,19 +13,19 @@ object Updatable extends TransactionMode{
 }
 
 object TransactionContext {
-  def apply(con: Connection, ro: TransactionMode = ReadOnly) = new TransactionContext(None) with BaseTransactionContext { val connection = con; val readonly = ro == ReadOnly }
+  def apply(sess:Session, ro: TransactionMode = ReadOnly) = new TransactionContext(None) with BaseTransactionContext { val session = sess; val readonly = ro == ReadOnly }
   def apply(parent: TransactionContext) = new TransactionContext(Some(parent))
 }
 
 class TransactionContext(val parent: Option[TransactionContext]) {
-  def getConnection(): Connection = {
+  def getSession():Session = {
     @tailrec
-    def recursGetConnection(t: TransactionContext): Connection = t match {
-      case b: BaseTransactionContext => b.connection
-      case _ => recursGetConnection(t.parent.get)
+    def recursGetSession(t: TransactionContext): Session = t match {
+      case b: BaseTransactionContext => b.session
+      case _ => recursGetSession(t.parent.get)
     }
 
-    recursGetConnection(TransactionContext.this)
+    recursGetSession(TransactionContext.this)
   }
 
   def setRollback: Unit = {
@@ -59,7 +60,7 @@ class TransactionContext(val parent: Option[TransactionContext]) {
 }
 
 trait BaseTransactionContext {
-  val connection: Connection
+  val session:Session
   val readonly: Boolean
   var rollback = false
 }

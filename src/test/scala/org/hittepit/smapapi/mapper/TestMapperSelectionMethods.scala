@@ -11,6 +11,7 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.BeforeAndAfter
 import org.hittepit.smapapi.transaction.TransactionManager
 import org.hittepit.smapapi.core.Param
+import org.hittepit.smapapi.core.Row
 
 class TestMapperSelectionMethods extends WordSpec with MustMatchers with MockitoSugar with JdbcTestTransaction with BeforeAndAfter {
   val logger = LoggerFactory.getLogger(classOf[TestMapperSelectionMethods])
@@ -19,8 +20,8 @@ class TestMapperSelectionMethods extends WordSpec with MustMatchers with Mockito
   val mapper = new BookMapper(transactionManager)
 
   before{
-	  inTransaction{ connection =>
-		  var st = connection.createStatement
+	  inTransaction{ session =>
+		  var st = session.connection.createStatement
 		  st.addBatch("create table BOOK (id integer auto_increment,isbn varchar(10),title varchar(20),author varchar(20), price double, PRIMARY KEY(id));")
 		  st.addBatch("insert into book (id,isbn,title,author,price) values (1,'12312','Test','toto',10.40);")
 		  st.addBatch("insert into book (id,isbn,title,author,price) values (2,'12313','Test2',null,5.60);")
@@ -30,8 +31,8 @@ class TestMapperSelectionMethods extends WordSpec with MustMatchers with Mockito
   }
   
   after{
-    inTransaction{connection =>
-		  var st = connection.createStatement
+    inTransaction{session =>
+		  var st = session.connection.createStatement
 		  st.addBatch("delete from book");
 	      st.addBatch("drop table BOOK;")
 		  st.executeBatch()
@@ -43,7 +44,7 @@ class TestMapperSelectionMethods extends WordSpec with MustMatchers with Mockito
   "The find method of a mapper" when invoked {
     "with an existing id with not null author" must {
       "return Some(b), b with Some(author)" in {
-        val b = mapper.find(1)
+        val b = mapper.find(Some(1))
         b match {
           case Some(book) =>
             book.id must be(Some(1))
@@ -56,7 +57,7 @@ class TestMapperSelectionMethods extends WordSpec with MustMatchers with Mockito
     }
     "with an existing id with a null author" must {
       "return Some(b), author beigin None" in {
-        val b = mapper.find(2)
+        val b = mapper.find(Some(2))
         b match {
           case Some(book) =>
             book.id must be(Some(2))
@@ -69,7 +70,7 @@ class TestMapperSelectionMethods extends WordSpec with MustMatchers with Mockito
     }
     "with a non existing id" must {
       "return None" in {
-        val b = mapper.find(40)
+        val b = mapper.find(Some(40))
         b match {
           case Some(book) => fail
           case None =>
@@ -115,12 +116,9 @@ class TestMapperSelectionMethods extends WordSpec with MustMatchers with Mockito
       "return the list of mapped objects" in readOnly { con =>
         val condition = and(Condition.like(mapper.title, "Test%"), gt(mapper.price, 5.0))
         val projection = Projection((Some("t"), mapper.title), (Some("a"), mapper.author))
-        val mapTuple: ResultSet => (String, Option[String]) = rs => {
-          val title = rs.getString("t")
-          val author = {
-            val a = rs.getString("a")
-            if (rs.wasNull()) None else Some(a)
-          }
+        val mapTuple: Row => (String, Option[String]) = r => {
+          val title = r.getColumnValue("t",NotNullableVarchar)
+          val author = r.getColumnValue("a",NullableVarchar)
           (title, author)
         }
 
@@ -135,8 +133,8 @@ class TestMapperSelectionMethods extends WordSpec with MustMatchers with Mockito
     "with a sql string, a list of params and a mapper" must {
       "return a list of mapped objects" in readOnly {con =>
         val select = mapper.select("select sum(price) as total, author from book where author like ? group by author",List(Param("to%",NotNullableVarchar)))
-        val tuples = select map { rs =>
-          (rs.getDouble("total"),rs.getString("author"))
+        val tuples = select map { row =>
+          (row.getColumnValue("total",NotNullableDouble),row.getColumnValue("author",NotNullableVarchar))
         }
         
         tuples.size must be(1)

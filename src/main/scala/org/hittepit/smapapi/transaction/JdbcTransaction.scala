@@ -3,16 +3,17 @@ package org.hittepit.smapapi.transaction
 import java.sql.Connection
 import org.slf4j.LoggerFactory
 import org.slf4j.Logger
+import org.hittepit.smapapi.core.Session
 
 trait JdbcTransaction{
   val transactionManager:TransactionManager
   val logger:Logger
 
-  def inTransaction[T](f: Connection => T): T = {
+  def inTransaction[T](f: Session => T): T = {
     var result: Option[T] = None
     val transaction = transactionManager.startNestedTransaction(Updatable)
     try {
-      result = Some(f(transaction.getConnection))
+      result = Some(f(transaction.getSession))
     } catch {
       case e: Throwable =>
         logger.info("Exception catched in execution. Mark transaction for rollback.", e)
@@ -24,11 +25,11 @@ trait JdbcTransaction{
     result.get
   }
 
-  def readOnly[T](f: Connection => T): T = {
+  def readOnly[T](f: Session => T): T = {
     var result: Option[T] = None
     val transaction = transactionManager.startNestedTransaction(ReadOnly)
     try {
-      result = Some(f(transaction.getConnection))
+      result = Some(f(transaction.getSession))
     } catch {
       case e: Throwable =>
         logger.info("Exception catched in execution. Transaction is in readonly mode.", e)

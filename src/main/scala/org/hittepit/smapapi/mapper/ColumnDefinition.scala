@@ -1,7 +1,6 @@
 package org.hittepit.smapapi.mapper
 
-import java.sql.PreparedStatement
-import java.sql.ResultSet
+import org.hittepit.smapapi.core.Row
 
 trait ColumnName {
   val name:String
@@ -22,14 +21,14 @@ class ColumnDefinition[E, P](n:String, st:SqlType[P], val g: E=>P) extends Colum
   val getter = g
   def value(t: E): P = getter(t)
 
-  def value(implicit rs: ResultSet) = sqlType.getColumnValue(rs,Left(name))
+  val value = (row:Row) => row.getColumnValue(name, sqlType)
   
-  def value(index:Int)(implicit rs: ResultSet) = sqlType.getColumnValue(rs,Right(index))
+//  def value(index:Int)(implicit row:Row) = row.getColumnValue(index, sqlType)
   
-  def setValue(index:Int, entity:E)(implicit ps:PreparedStatement) = {
-	  val v = value(entity)
-	  sqlType.setColumnValue(index, v,ps)
-	}
+//  def setValue(index:Int, entity:E)(implicit ps:PreparedStatement) = {
+//	  val v = value(entity)
+//	  sqlType.setColumnValue(index, v,ps)
+//	}
 }
 
 

@@ -105,4 +105,8 @@ class Session(val connection: Connection) {
     }
     ps.executeUpdate()
   }
+  
+  def commit() = connection.commit()
+  def rollback() = connection.rollback()
+  def close() = connection.close
 }

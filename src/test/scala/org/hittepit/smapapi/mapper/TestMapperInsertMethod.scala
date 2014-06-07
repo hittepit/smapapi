@@ -16,8 +16,8 @@ class TestMapperInsertMethod extends WordSpec with MustMatchers with MockitoSuga
   val mapper = new BookMapper(transactionManager)
 
   before{
-	  inTransaction{ connection =>
-		  var st = connection.createStatement
+	  inTransaction{ session =>
+		  var st = session.connection.createStatement
 		  st.addBatch("create table BOOK (id integer auto_increment,isbn varchar(10),title varchar(20),author varchar(20), price double, PRIMARY KEY(id));")
 		  st.addBatch("insert into book (id,isbn,title,author,price) values (1,'12312','Test','toto',10.40);")
 		  st.addBatch("insert into book (id,isbn,title,author,price) values (2,'12313','Test2',null,5.60);")
@@ -27,8 +27,8 @@ class TestMapperInsertMethod extends WordSpec with MustMatchers with MockitoSuga
   }
   
   after{
-    inTransaction{connection =>
-		  var st = connection.createStatement
+    inTransaction{session =>
+		  var st = session.connection.createStatement
 		  st.addBatch("delete from book");
 	      st.addBatch("drop table BOOK;")
 		  st.executeBatch()
@@ -49,11 +49,11 @@ class TestMapperInsertMethod extends WordSpec with MustMatchers with MockitoSuga
         b2.price must be(4.6)
       }
       
-      "insert the object in database" in withRollback{con =>
+      "insert the object in database" in withRollback{session =>
         val b = Book(None,"111","Nouveau",Some("ddd"),4.6)
         val b2 = mapper.insert(b)
         val id = b2.id.get
-        val st = con.prepareStatement("select * from BOOK where id = ?")
+        val st = session.connection.prepareStatement("select * from BOOK where id = ?")
         st.setInt(1, id)
         val rs = st.executeQuery()
         rs.next()
@@ -62,11 +62,11 @@ class TestMapperInsertMethod extends WordSpec with MustMatchers with MockitoSuga
         rs.getDouble("price") must be(4.6)
       }
       
-      "insert the object in database with null where properties are None" in withRollback{con =>
+      "insert the object in database with null where properties are None" in withRollback{session =>
         val b = Book(None,"111","Nouveau",None,4.6)
         val b2 = mapper.insert(b)
         val id = b2.id.get
-        val st = con.prepareStatement("select * from BOOK where id = ?")
+        val st = session.connection.prepareStatement("select * from BOOK where id = ?")
         st.setInt(1, id)
         val rs = st.executeQuery()
         rs.next()

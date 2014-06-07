@@ -7,6 +7,8 @@ import java.sql.ResultSet
 import org.slf4j.LoggerFactory
 import java.sql.Connection
 import org.hittepit.smapapi.test.JdbcTestTransaction
+import org.hittepit.smapapi.core.Column
+import org.hittepit.smapapi.core.Row
 
 case class Book(id: Option[Int], isbn: String, title: String, author: Option[String], price:Double)
 
@@ -18,7 +20,7 @@ class BookMapper(val transactionManager:TransactionManager) extends Mapper[Book,
   val title = Column("title", NotNullableVarchar) <~ ((b:Book) => b.title)
   val author = Column("author", NullableVarchar) <~ (_.author)
   val price = Column("price",NotNullableDouble) <~ (_.price)
-  def mapping(implicit rs: ResultSet) = Book(pk, isbn, title, author,price)
+  def mapping(row:Row) = Book(pk(row), isbn(row), title(row), author(row),price(row))
   val insertable = List(isbn, title, author,price)
   val updatable = List(isbn, title, author,price)
 }
@@ -30,9 +32,3 @@ class DataSource extends BasicDataSource {
   this.defaultTransactionIsolation = Connection.TRANSACTION_READ_COMMITTED
   this.setUrl("jdbc:h2:mem:test;MVCC=TRUE")
 }
-//
-//trait MockBookMapper extends JdbcTestTransaction{
-//  val ds = new DataSource{}
-//  val transactionManager = new TransactionManager(ds)
-//  val mapper = new BookMapper(transactionManager)
-//}
