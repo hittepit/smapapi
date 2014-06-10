@@ -6,7 +6,8 @@ import java.sql.Types
 import org.hittepit.smapapi.mapper.NullValueException
 import java.sql.Clob
 import java.sql.Blob
-trait Sql {
+
+object Sql {
   type ColumnGetter[T] = ((ResultSet, Int) => T, (ResultSet, String) => T)
   type ColumnSetter[T] = ((PreparedStatement, Int, T) => Unit, Int)
 
@@ -52,7 +53,9 @@ trait Sql {
   
 }
 
-trait SqlType[T] extends Sql {
+import Sql._
+
+trait SqlType[T] {
 //  val typeSql: Int
   val getColumnValue: (ResultSet, Either[String,Int]) => T
   val setColumnValue: (Int, T,PreparedStatement) => Unit
