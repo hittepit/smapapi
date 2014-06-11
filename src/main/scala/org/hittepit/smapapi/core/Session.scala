@@ -72,14 +72,19 @@ object Column{
   }
 }
 
-class QueryResult(val rs: ResultSet) {
+/**
+ * Classe qui encapsule un ResulSet. Elle permet de mapper les lignes du ResultSet vers des objets.
+ * @constructor Crée un objet QueryResult
+ * @param resultSet le ResultSet encapsulé
+ */
+class QueryResult(val resultSet: ResultSet) {
   /**
-   * Transforme un ResultSet en objets
+   * Transforme un ResultSet en objets de type T
    * @param mapper fonction
    */
   def map[T](mapper: Row => T): List[T] = {
-    def innerMap(acc: List[T]): List[T] = if (rs.next) {
-      innerMap(acc ::: List(mapper(new Row(rs))))
+    def innerMap(acc: List[T]): List[T] = if (resultSet.next) {
+      innerMap(acc ::: List(mapper(new Row(resultSet))))
     } else {
       acc
     }
