@@ -5,14 +5,40 @@ import java.sql.ResultSet
 import java.sql.ResultSetMetaData
 import scala.collection.mutable.ArraySeq
 
+/**
+ * Définition d'un paramètre à injecter dans un PreparedStatement.
+ * 
+ * @constructor Crée un objet Param
+ * @param value la valeur du paramètre
+ * @param sqlType le type sql du paramètre
+ * 
+ */
 case class Param[T](value: T, sqlType: SqlType[T])
 
+/**
+ * Définition d'un colonne. Elle permet de récupérer une valeur dans un ResultSet.
+ * 
+ * La colonne peut être définie soit par son index dans le ResultSet, soit par son nom.
+ */
 class Column[T] private(n:Option[String], i:Option[Int], st:SqlType[T]){
-  def this(n:String,st:SqlType[T]) = this(Some(n),None,st)
-  def this(i:Int,st:SqlType[T]) = this(None, Some(i),st)
+  /**
+   * Crée une colonne pouvant être retrouvée via son nom
+   * @param columnName le nom de la colonne
+   * @param sqlT le SqlType correspondant à la colonne
+   */
+  def this(columnName:String,sqlT:SqlType[T]) = this(Some(columnName),None,sqlT)
+  /**
+   * Crée une colonne pouvant être retrouvée via son nom
+   * @param columnIndex l'index de la colonne (à partir de 1)
+   * @param sqlT le SqlType correspondant à la colonne
+   */
+  def this(columnIndex:Int,sqlT:SqlType[T]) = this(None, Some(columnIndex),sqlT)
   
+  /** Le nom de la colonne dans le ResultSet, si défini*/
   val name = n
+  /** L'index de la colonne dans le ResultSet, si défini*/
   val index = i
+  /** Le type Sql de la colonne dans le ResultSet */
   val sqlType = st
 }
 
