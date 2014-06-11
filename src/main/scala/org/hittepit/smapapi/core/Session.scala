@@ -24,15 +24,15 @@ class Column[T] private(n:Option[String], i:Option[Int], st:SqlType[T]){
   /**
    * Crée une colonne pouvant être retrouvée via son nom
    * @param columnName le nom de la colonne
-   * @param sqlT le SqlType correspondant à la colonne
+   * @param sqlType le SqlType correspondant à la colonne
    */
-  def this(columnName:String,sqlT:SqlType[T]) = this(Some(columnName),None,sqlT)
+  def this(columnName:String,sqlType:SqlType[T]) = this(Some(columnName),None,sqlType)
   /**
    * Crée une colonne pouvant être retrouvée via son nom
    * @param columnIndex l'index de la colonne (à partir de 1)
-   * @param sqlT le SqlType correspondant à la colonne
+   * @param sqlType le SqlType correspondant à la colonne
    */
-  def this(columnIndex:Int,sqlT:SqlType[T]) = this(None, Some(columnIndex),sqlT)
+  def this(columnIndex:Int,sqlType:SqlType[T]) = this(None, Some(columnIndex),sqlType)
   
   /** Le nom de la colonne dans le ResultSet, si défini*/
   val name = n
@@ -42,17 +42,41 @@ class Column[T] private(n:Option[String], i:Option[Int], st:SqlType[T]){
   val sqlType = st
 }
 
+/**
+ * Contient les méthodes factory et les extracteurs de [[Column]].
+ */
 object Column{
+  /**
+   * Construit un objet [[Column]] à partir de son nom dans le ResultSet.
+   * @param name nom de la colonne dans le ResultSet
+   * @param sqlType type Sql de la colonne
+   */
   def apply[T](name:String,sqlType:SqlType[T]) = new Column(name,sqlType)
+  /**
+   * Construit un objet [[Column]] à partir de son index (à partir de 1) dans le ResultSet.
+   * @param index index de la colonne dans le ResultSet
+   * @param sqlType type Sql de la colonne
+   */
   def apply[T](index:Int,sqlType:SqlType[T]) = new Column(index,sqlType)
   
-  def unapply[T](c:Column[T]):Option[(_,SqlType[T])] = c.name match {
-    case Some(n) => Some(n,c.sqlType)
-    case None => Some(c.index.get,c.sqlType)
+  /**
+   * Extracteur pour la class [[Column]]
+   * @param column l'objet [[Column]] à pattern matcher
+   * @return une option contenant un tuple, 
+   *  - (Int,SqlType) si c'est une colonne définie sur base de son index
+   *  - (String,SqlType) si c'est une colonne définie sur base de son nom
+   */
+  def unapply[T](column:Column[T]):Option[(_,SqlType[T])] = column.name match {
+    case Some(n) => Some(n,column.sqlType)
+    case None => Some(column.index.get,column.sqlType)
   }
 }
 
 class QueryResult(val rs: ResultSet) {
+  /**
+   * Transforme un ResultSet en objets
+   * @param mapper fonction
+   */
   def map[T](mapper: Row => T): List[T] = {
     def innerMap(acc: List[T]): List[T] = if (rs.next) {
       innerMap(acc ::: List(mapper(new Row(rs))))
