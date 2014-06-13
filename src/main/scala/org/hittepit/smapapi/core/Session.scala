@@ -74,8 +74,19 @@ object Column{
   }
 }
 
-
+/**
+ * Classe encapsulant une connexion et automatisant les échanges avec la base de données en masquant l'utilisation de JDBC.
+ * @constructor Crée une session
+ * @param connection la connexion encapsulée dans la session. Une session n'utilise qu'une seule et unique connexion.
+ */
 class Session(val connection: Connection) {
+  /**
+   * Méthode de base pour exécuter un SELECT SQL. Elle génère un ResulSet et l'encapsule dans un [[org.hittepit.smapapi.core.result.QueryResult QueryResult]].
+   *  
+   * @param sql String contenant la requête SQL qui sera utilisée pour créer un PreparedStatement. Les paramètres variables doivent donc être représenté par '?'
+   * @param params Liste d'objet [[Param]] qui seront injectés dans le PreparedStatement.
+   * @return un [[org.hittepit.smapapi.core.result.QueryResult QueryResult]]
+   */
   def select(sql: String, params: List[Param[_]]): QueryResult = {
     val ps = connection.prepareStatement(sql)
 
@@ -88,8 +99,25 @@ class Session(val connection: Connection) {
     new QueryResult(ps.executeQuery)
   }
 
+  /**
+   * Méthode permettant d'exécuter un select et de retourner directement une liste d'objets de type T.
+   * @param sql String contenant la requête SQL qui sera utilisée pour créer un PreparedStatement. Les paramètres variables doivent donc être représenté par '?'
+   * @param params Liste d'objets [[Param]] qui seront injectés dans le PreparedStatement.
+   * @param mapper une méthode qui transforme une [[org.hittepit.smapapi.core.result.Row Row]] en objet T
+   * @return une liste d'objets T
+   */
   def select[T](sql: String, params: List[Param[_]], mapper: Row => T): Seq[T] = select(sql, params) map (mapper)
 
+
+  /**
+   * Méthode permettant d'exécuter un select et de retourner un objet T unique. Si la requête retourne plusieurs rows, une exception est lancée.
+   * @param sql String contenant la requête SQL qui sera utilisée pour créer un PreparedStatement. Les paramètres variables doivent donc être représenté par '?'
+   * @param params Liste d'objets [[Param]] qui seront injectés dans le PreparedStatement.
+   * @param mapper une méthode qui transforme une [[org.hittepit.smapapi.core.result.Row Row]] en objet T
+   * @return un objet T
+   * @throws Exception lorsque la requête retourne plusieurs objets
+   * @todo l'exception doit être plus spécifique
+   */
   def unique[T](sql: String, params: List[Param[_]], mapper: Row => T): Option[T] = select(sql, params) map (mapper) match {
     case Nil => None
     case List(t) => Some(t)
@@ -138,5 +166,5 @@ class Session(val connection: Connection) {
   
   def commit() = connection.commit()
   def rollback() = connection.rollback()
-  def close() = connection.close
+  def close() = connection.close //TODO l'état de la session doit être clair, si elle est fermée, elle ne peut plus être utilisée
 }

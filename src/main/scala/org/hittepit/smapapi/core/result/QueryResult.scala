@@ -11,7 +11,7 @@ import java.sql.ResultSet
 class QueryResult(val resultSet: ResultSet) {
   /**
    * Transforme un ResultSet en objets de type T
-   * @param mapper fonction
+   * @param mapper fonction qui transforme une [[Row]] dans l'objet cible de type T
    */
   def map[T](mapper: Row => T): List[T] = {
     def innerMap(acc: List[T]): List[T] = if (resultSet.next) {
