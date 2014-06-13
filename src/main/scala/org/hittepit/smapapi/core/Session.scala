@@ -4,6 +4,8 @@ import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.ResultSetMetaData
 import scala.collection.mutable.ArraySeq
+import org.hittepit.smapapi.core.queryResult.QueryResult
+import org.hittepit.smapapi.core.queryResult.Row
 
 /**
  * Définition d'un paramètre à injecter dans un PreparedStatement.
@@ -72,32 +74,6 @@ object Column{
   }
 }
 
-/**
- * Classe qui encapsule un ResulSet. Elle permet de mapper les lignes du ResultSet vers des objets.
- * @constructor Crée un objet QueryResult
- * @param resultSet le ResultSet encapsulé
- */
-class QueryResult(val resultSet: ResultSet) {
-  /**
-   * Transforme un ResultSet en objets de type T
-   * @param mapper fonction
-   */
-  def map[T](mapper: Row => T): List[T] = {
-    def innerMap(acc: List[T]): List[T] = if (resultSet.next) {
-      innerMap(acc ::: List(mapper(new Row(resultSet))))
-    } else {
-      acc
-    }
-
-    innerMap(Nil)
-  }
-}
-
-class Row(resultSet: ResultSet) {
-  def getColumnValue[T](index: Int, sqlType: SqlType[T]) = sqlType.getColumnValue(resultSet, Right(index))
-  def getColumnValue[T](columnName: String, sqlType: SqlType[T]) = sqlType.getColumnValue(resultSet, Left(columnName))
-
-}
 
 class Session(val connection: Connection) {
   def select(sql: String, params: List[Param[_]]): QueryResult = {

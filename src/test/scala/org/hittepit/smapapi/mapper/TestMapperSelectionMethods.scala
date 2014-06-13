@@ -11,10 +11,10 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.BeforeAndAfter
 import org.hittepit.smapapi.transaction.TransactionManager
 import org.hittepit.smapapi.core.Param
-import org.hittepit.smapapi.core.Row
 import org.hittepit.smapapi.core.NullableVarchar
 import org.hittepit.smapapi.core.NotNullableVarchar
 import org.hittepit.smapapi.core.NotNullableDouble
+import org.hittepit.smapapi.core.queryResult.Row
 
 class TestMapperSelectionMethods extends WordSpec with MustMatchers with MockitoSugar with JdbcTestTransaction with BeforeAndAfter {
   val logger = LoggerFactory.getLogger(classOf[TestMapperSelectionMethods])

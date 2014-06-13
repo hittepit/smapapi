@@ -1,6 +1,6 @@
 package org.hittepit.smapapi.mapper
 
-import org.hittepit.smapapi.core.Row
+import org.hittepit.smapapi.core.queryResult.Row
 import org.hittepit.smapapi.core.SqlType
 
 trait ColumnName {

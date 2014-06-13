@@ -5,8 +5,8 @@ import scala.annotation.tailrec
 import org.hittepit.smapapi.transaction.JdbcTransaction
 import org.hittepit.smapapi.transaction.TransactionContext
 import org.hittepit.smapapi.core.Param
-import org.hittepit.smapapi.core.QueryResult
-import org.hittepit.smapapi.core.Row
+import org.hittepit.smapapi.core.queryResult.QueryResult
+import org.hittepit.smapapi.core.queryResult.Row
 import org.hittepit.smapapi.core.Column
 import org.hittepit.smapapi.core.SqlType
 
