@@ -14,14 +14,19 @@ class QueryResult(val resultSet: ResultSet) {
    * @param mapper fonction qui transforme une [[Row]] dans l'objet cible de type T
    */
   def map[T](mapper: Row => T): List[T] = {
-    def innerMap(acc: List[T]): List[T] = if (resultSet.next) {
-      innerMap(acc ::: List(mapper(new Row(resultSet))))
-    } else {
-      acc
+    def innerMap(acc: List[T]): List[T] = nextRow() match {
+      case Some(row) => innerMap(acc ::: List(mapper(row)))
+      case None => acc
     }
 
     innerMap(Nil)
   }
+  
+  /**
+   * Génère une [[Row]] correspondant à la ligne suivante du ResultSet, s'il y en a.
+   * @return Some(row) où row elle la [[Row]] courant, None s'il n'y a plus de row.
+   */
+  def nextRow():Option[Row] = if(resultSet.next) Some(new Row(resultSet)) else None
 }
 
 /**
