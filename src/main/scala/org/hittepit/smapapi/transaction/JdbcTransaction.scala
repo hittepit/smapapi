@@ -10,10 +10,9 @@ trait JdbcTransaction{
   val logger:Logger
 
   def inTransaction[T](f: Session => T): T = {
-    var result: Option[T] = None
     val transaction = transactionManager.startNestedTransaction(Updatable)
     try {
-      result = Some(f(transaction.getSession))
+      f(transaction.getSession)
     } catch {
       case e: Throwable =>
         logger.info("Exception catched in execution. Mark transaction for rollback.", e)
@@ -22,21 +21,19 @@ trait JdbcTransaction{
     } finally {
       transactionManager.closeNestedTransaction
     }
-    result.get
   }
 
   def readOnly[T](f: Session => T): T = {
-    var result: Option[T] = None
     val transaction = transactionManager.startNestedTransaction(ReadOnly)
     try {
-      result = Some(f(transaction.getSession))
+      f(transaction.getSession)
     } catch {
       case e: Throwable =>
         logger.info("Exception catched in execution. Transaction is in readonly mode.", e)
+        transaction.setRollback //TODO vérifier, readonly sur 
         throw e
     } finally {
       transactionManager.closeNestedTransaction
     }
-    result.get
   }
 }
