@@ -12,7 +12,7 @@ import org.hittepit.smapapi.core.NullableVarchar
 import org.hittepit.smapapi.core.NullableInteger
 import org.hittepit.smapapi.core.NotNullableVarchar
 import org.hittepit.smapapi.core.NotNullableDouble
-import org.hittepit.smapapi.core.queryResult.Row
+import org.hittepit.smapapi.core.result.Row
 
 case class Book(id: Option[Int], isbn: String, title: String, author: Option[String], price:Double)
 

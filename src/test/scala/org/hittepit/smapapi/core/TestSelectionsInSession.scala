@@ -5,7 +5,7 @@ import java.sql.Connection
 import org.scalatest.WordSpec
 import org.scalatest.BeforeAndAfter
 import org.scalatest.MustMatchers
-import org.hittepit.smapapi.core.queryResult.Row
+import org.hittepit.smapapi.core.result.Row
 
 class TestSelectionsInSession extends WordSpec with BeforeAndAfter with MustMatchers{
   class DataSource extends BasicDataSource {

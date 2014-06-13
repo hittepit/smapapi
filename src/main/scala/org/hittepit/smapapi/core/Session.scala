@@ -4,8 +4,8 @@ import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.ResultSetMetaData
 import scala.collection.mutable.ArraySeq
-import org.hittepit.smapapi.core.queryResult.QueryResult
-import org.hittepit.smapapi.core.queryResult.Row
+import org.hittepit.smapapi.core.result.QueryResult
+import org.hittepit.smapapi.core.result.Row
 
 /**
  * Définition d'un paramètre à injecter dans un PreparedStatement.

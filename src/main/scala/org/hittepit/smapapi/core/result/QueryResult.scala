@@ -1,10 +1,10 @@
-package org.hittepit.smapapi.core.queryResult
+package org.hittepit.smapapi.core.result
 
 import org.hittepit.smapapi.core.SqlType
 import java.sql.ResultSet
 
 /**
- * Classe qui encapsule un ResulSet. Elle permet de mapper les lignes du ResultSet vers des objets.
+ * Classe qui encapsule un ResultSet. Elle permet de mapper les lignes du ResultSet vers des objets.
  * @constructor Crée un objet QueryResult
  * @param resultSet le ResultSet encapsulé
  */
@@ -29,7 +29,7 @@ class QueryResult(val resultSet: ResultSet) {
  * @constructor Crée un objet row
  * @param resultSet le ResultSet pointant sur la bonne row. C'est le QueryResult qui se charge de faire pointer le resultSet sur la row devant être récupérée.
  */
-class Row private[queryResult](resultSet: ResultSet) {
+class Row private[result](resultSet: ResultSet) {
   /**
    * Retourne la valeur d'une colonne dans un ResultSet à partir de son index
    * @param index index de la colonne
