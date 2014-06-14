@@ -20,7 +20,7 @@ class TestInsertInSession extends WordSpec with BeforeAndAfter with MustMatchers
   before {
     val connection = ds.getConnection()
     var st = connection.createStatement
-    st.addBatch("create table TEST (id integer auto_increment,name varchar(10),valeur integer auto_increment, PRIMARY KEY(id));")
+    st.addBatch("create table TEST (id integer auto_increment,name varchar(20),valeur integer auto_increment, PRIMARY KEY(id));")
     st.addBatch("insert into TEST (id,name) values (1,'Test1');")
     st.addBatch("insert into TEST (id,name) values (2,'Test2');")
     st.addBatch("insert into TEST (id,name) values (3,'Test3');")
@@ -46,11 +46,11 @@ class TestInsertInSession extends WordSpec with BeforeAndAfter with MustMatchers
         val session = new Session(connection)
         
         val valueGenerated = session.insert("insert into TEST (name) values (?)",List(Param("toto",NotNullableVarchar)),Column("id",NotNullableInteger))
-        
-        connection.commit
-        connection.close
   
         valueGenerated must be('defined)
+        
+        session.rollback
+        session.close
       }
       
       "insert the data in db" in {
@@ -59,8 +59,6 @@ class TestInsertInSession extends WordSpec with BeforeAndAfter with MustMatchers
         
         val valueGenerated = session.insert("insert into TEST (name) values (?)",List(Param("hello",NotNullableVarchar)),Column("id",NotNullableInteger))
         
-        connection.commit
-  
         valueGenerated must be('defined)
         val id = valueGenerated.get
         
@@ -71,49 +69,28 @@ class TestInsertInSession extends WordSpec with BeforeAndAfter with MustMatchers
         rs.getString("name") must be("hello")
         rs.getInt("valeur")
         rs.wasNull must be(false)
-        connection.close
+        
+        session.rollback
+        session.close
       }
     }
     "called without auto-generated id" must {
-      "return None" in {
-        pending
-      }
       "insert the data in DB" in {
-        pending
+        val connection = ds.getConnection()
+        val session = new Session(connection)
+        
+        session.insert("insert into TEST (id,name) values (?,?)",List(Param(1000,NotNullableInteger),Param("hello again",NotNullableVarchar)))
+        
+        val ps = connection.prepareStatement("select * from test where id = ?")
+        ps.setInt(1, 1000)
+        val rs = ps.executeQuery()
+        rs.next
+        rs.getString("name") must be("hello again")
+        rs.getInt("id") must be(1000)
+        
+        session.rollback
+        session.close
       }
-    }
-  }
-  
-  "The execute method" when {
-    "called with an update" must {
-      "update the concerned rows" in {
-        pending
-      }
-      "return the number of affected rows" in {
-        pending
-      } 
-      "return 0 if no row was affacted" in {
-        pending
-      }
-    }
-    "called with an delete" must {
-      "delete the concerned rows" in {
-        pending
-      }
-      "return the number of affected rows" in {
-        pending
-      } 
-      "return 0 if no row was affacted" in {
-        pending
-      }
-    }
-    "called with an insert" must {
-      "insert a new row" in {
-        pending
-      }
-      "return the number of affected rows" in {
-        pending
-      } 
     }
   }
 

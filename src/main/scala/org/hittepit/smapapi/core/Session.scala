@@ -124,8 +124,9 @@ class Session(val connection: Connection) {
     case _ => throw new Exception("More than one result") //TODO exception 
   }
 
-  def insert[T](sql: String, params: List[Param[_]], generatedId: Column[T]): Option[T] = insert(sql,params,Some(generatedId)) 
-  def insert[T](sql: String, params: List[Param[_]]): Option[T] = insert(sql,params,None) 
+  def insert[T](sql: String, params: List[Param[_]], generatedId: Column[T]): Option[T] = insert(sql,params,Some(generatedId))
+  
+  def insert[T](sql: String, params: List[Param[_]]): Unit = insert(sql,params,None) 
   
   private def insert[T](sql: String, params: List[Param[_]], generatedId: Option[Column[T]]): Option[T] = {
     val ps = generatedId match {
