@@ -12,7 +12,7 @@ import org.hittepit.smapapi.transaction.TransactionManager
 class TestMapperUpdateMethod extends WordSpec with MustMatchers with MockitoSugar with JdbcTestTransaction with BeforeAndAfter {
   val logger = LoggerFactory.getLogger(classOf[TestMapperUpdateMethod])
   val ds = new DataSource{}
-  val transactionManager = new TransactionManager(ds)
+  val transactionManager = TransactionManager(ds)
   val mapper = new BookMapper(transactionManager)
 
   before{

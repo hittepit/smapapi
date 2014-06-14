@@ -5,7 +5,26 @@ import javax.sql.DataSource
 import org.slf4j.Logger
 import org.hittepit.smapapi.core.Session
 
-class TransactionManager(ds:DataSource) {
+object TransactionManager{
+  var managers = Map[(String,String),TransactionManager]()
+  
+  def apply(ds:DataSource) = {
+    val connection = ds.getConnection()
+    val metadata = connection.getMetaData()
+    val url = metadata.getURL()
+    val username = metadata.getUserName()
+    connection.close
+    
+    managers.get((url,username)) match {
+      case Some(tm) => tm
+      case None => val tm = new TransactionManager(ds)
+      				managers += ((url,username) -> tm)
+      				tm
+    }
+  }
+}
+
+class TransactionManager (ds:DataSource) {
   val dataSource:DataSource = ds
   val logger:Logger = LoggerFactory.getLogger(classOf[TransactionManager])
 
