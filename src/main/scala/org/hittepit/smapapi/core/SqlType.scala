@@ -11,15 +11,15 @@ object Sql {
   type ColumnGetter[T] = ((ResultSet, Int) => T, (ResultSet, String) => T)
   type ColumnSetter[T] = ((PreparedStatement, Int, T) => Unit, Int)
 
-  def getNullableColumn[T](getter: ColumnGetter[T])(rs: ResultSet, colonne: Either[String,Int]): Option[T] = {
+  def getNullableColumn[T](getter: ColumnGetter[T])(rs: ResultSet, colonne: Either[String, Int]): Option[T] = {
     val v = colonne match {
       case Left(c) => getter._2(rs, c)
       case Right(c) => getter._1(rs, c)
     }
     if (rs.wasNull()) None else Some(v)
   }
-  
-  def getNotNullableColumn[T](getter: ColumnGetter[T])(rs: ResultSet, colonne: Either[String,Int]): T = {
+
+  def getNotNullableColumn[T](getter: ColumnGetter[T])(rs: ResultSet, colonne: Either[String, Int]): T = {
     val v = colonne match {
       case Left(c) => getter._2(rs, c)
       case Right(c) => getter._1(rs, c)
@@ -35,7 +35,7 @@ object Sql {
   def setNotNullableColumn[T](setter: ColumnSetter[T])(index: Int, value: T, ps: PreparedStatement) =
     setter._1(ps, index, value)
 
-    //TODO Long, Float, Date, Time
+  //TODO Long, Float, Date, Time
   val getStringColumn: ColumnGetter[String] = ((rs: ResultSet, index: Int) => rs.getString(index), (rs: ResultSet, name: String) => rs.getString(name))
   val setStringColumn: ColumnSetter[String] = ((ps: PreparedStatement, index: Int, v: String) => ps.setString(index, v), Types.VARCHAR)
   val getClobColumn: ColumnGetter[Clob] = ((rs: ResultSet, index: Int) => rs.getClob(index), (rs: ResultSet, name: String) => rs.getClob(name))
@@ -48,93 +48,84 @@ object Sql {
   val setDoubleColumn: ColumnSetter[Double] = ((ps: PreparedStatement, index: Int, v: Double) => ps.setDouble(index, v), Types.DOUBLE)
   val getBooleanColumn: ColumnGetter[Boolean] = ((rs: ResultSet, index: Int) => rs.getBoolean(index), (rs: ResultSet, name: String) => rs.getBoolean(name))
   val setBooleanColumn: ColumnSetter[Boolean] = ((ps: PreparedStatement, index: Int, v: Boolean) => ps.setBoolean(index, v), Types.BOOLEAN)
-  val getBigDecimalColumn:ColumnGetter[BigDecimal] = ((rs: ResultSet, index:Int) => rs.getBigDecimal(index), (rs: ResultSet, name: String) => rs.getBigDecimal(name))
+  val getBigDecimalColumn: ColumnGetter[BigDecimal] = ((rs: ResultSet, index: Int) => rs.getBigDecimal(index), (rs: ResultSet, name: String) => rs.getBigDecimal(name))
   val setBigDecimalColumn: ColumnSetter[BigDecimal] = ((ps: PreparedStatement, index: Int, v: BigDecimal) => ps.setBigDecimal(index, v.bigDecimal), Types.DECIMAL)
-  
+
 }
 
 import Sql._
 
 trait SqlType[T] {
-//  val typeSql: Int
-  val getColumnValue: (ResultSet, Either[String,Int]) => T
-  val setColumnValue: (Int, T,PreparedStatement) => Unit
+  def getColumnValue(rs: ResultSet, column: Either[String, Int]): T
+  def setColumnValue(index: Int, value: T, ps: PreparedStatement): Unit
 }
 
 object NullableVarchar extends SqlType[Option[String]] {
-//  val typeSql = Types.VARCHAR
-  val getColumnValue = getNullableColumn(getStringColumn)(_, _)
-  val setColumnValue = setNullableColumn(setStringColumn)(_, _, _)
+  def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getStringColumn)(rs, column)
+  def setColumnValue(index: Int, value: Option[String], ps: PreparedStatement) = setNullableColumn(setStringColumn)(index, value, ps)
 }
 
 object NotNullableVarchar extends SqlType[String] {
-//  val typeSql = Types.VARCHAR
-  val getColumnValue = getNotNullableColumn(getStringColumn)(_, _)
-  val setColumnValue = setNotNullableColumn(setStringColumn)(_, _, _)
+  def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getStringColumn)(rs, column)
+  def setColumnValue(index: Int, value: String, ps: PreparedStatement) = setNotNullableColumn(setStringColumn)(index, value, ps)
 }
 
 object NullableClob extends SqlType[Option[Clob]] {
-  val getColumnValue = getNullableColumn(getClobColumn)(_, _)
-  val setColumnValue = setNullableColumn(setClobColumn)(_, _, _)
+  def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getClobColumn)(rs, column)
+  def setColumnValue(index: Int, value: Option[Clob], ps: PreparedStatement) = setNullableColumn(setClobColumn)(index, value, ps)
 }
 
 object NotNullableClob extends SqlType[Clob] {
-  val getColumnValue = getNotNullableColumn(getClobColumn)(_, _)
-  val setColumnValue = setNotNullableColumn(setClobColumn)(_, _, _)
+  def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getClobColumn)(rs, column)
+  def setColumnValue(index: Int, value: Clob, ps: PreparedStatement) = setNotNullableColumn(setClobColumn)(index, value, ps)
 }
 
 object NullableBlob extends SqlType[Option[Blob]] {
-  val getColumnValue = getNullableColumn(getBlobColumn)(_, _)
-  val setColumnValue = setNullableColumn(setBlobColumn)(_, _, _)
+  def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getBlobColumn)(rs, column)
+  def setColumnValue(index: Int, value: Option[Blob], ps: PreparedStatement) = setNullableColumn(setBlobColumn)(index, value, ps)
 }
 
 object NotNullableBlob extends SqlType[Blob] {
-  val getColumnValue = getNotNullableColumn(getBlobColumn)(_, _)
-  val setColumnValue = setNotNullableColumn(setBlobColumn)(_, _, _)
+  def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getBlobColumn)(rs, column)
+  def setColumnValue(index: Int, value: Blob, ps: PreparedStatement) = setNotNullableColumn(setBlobColumn)(index, value, ps)
 }
 
 object NullableInteger extends SqlType[Option[Int]] {
-//  val typeSql = Types.INTEGER
-  val getColumnValue = getNullableColumn(getIntColumn)(_, _)
-  val setColumnValue = setNullableColumn(setIntColumn)(_, _, _)
+  def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getIntColumn)(rs, column)
+  def setColumnValue(index: Int, value: Option[Int], ps: PreparedStatement) = setNullableColumn(setIntColumn)(index, value, ps)
 }
 
 object NotNullableInteger extends SqlType[Int] {
-//  val typeSql = Types.INTEGER
-  val getColumnValue = getNotNullableColumn(getIntColumn)(_, _)
-  val setColumnValue = setNotNullableColumn(setIntColumn)(_, _, _)
+  def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getIntColumn)(rs, column)
+  def setColumnValue(index: Int, value: Int, ps: PreparedStatement) = setNotNullableColumn(setIntColumn)(index, value, ps)
 }
 
 object NullableDouble extends SqlType[Option[Double]] {
-//  val typeSql = Types.INTEGER
-  val getColumnValue = getNullableColumn(getDoubleColumn)(_, _)
-  val setColumnValue = setNullableColumn(setDoubleColumn)(_, _, _)
+  def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getDoubleColumn)(rs, column)
+  def setColumnValue(index: Int, value: Option[Double], ps: PreparedStatement) = setNullableColumn(setDoubleColumn)(index, value, ps)
 }
 
 object NotNullableDouble extends SqlType[Double] {
-//  val typeSql = Types.INTEGER
-  val getColumnValue = getNotNullableColumn(getDoubleColumn)(_, _)
-  val setColumnValue = setNotNullableColumn(setDoubleColumn)(_, _, _)
+  def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getDoubleColumn)(rs, column)
+  def setColumnValue(index: Int, value: Double, ps: PreparedStatement) = setNotNullableColumn(setDoubleColumn)(index, value, ps)
 }
 
 object NullableBoolean extends SqlType[Option[Boolean]] {
-  val getColumnValue = getNullableColumn(getBooleanColumn)(_, _)
-  val setColumnValue = setNullableColumn(setBooleanColumn)(_, _, _)
+  def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getBooleanColumn)(rs, column)
+  def setColumnValue(index: Int, value: Option[Boolean], ps: PreparedStatement) = setNullableColumn(setBooleanColumn)(index, value, ps)
 }
 
 object NotNullableBoolean extends SqlType[Boolean] {
-  val getColumnValue = getNotNullableColumn(getBooleanColumn)(_, _)
-  val setColumnValue = setNotNullableColumn(setBooleanColumn)(_, _, _)
+  def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getBooleanColumn)(rs, column)
+  def setColumnValue(index: Int, value: Boolean, ps: PreparedStatement) = setNotNullableColumn(setBooleanColumn)(index, value, ps)
 }
 
 object NullableBigDecimal extends SqlType[Option[BigDecimal]] {
-//  val typeSql = Types.DECIMAL
-  val getColumnValue = getNullableColumn(getBigDecimalColumn)(_, _)
-  val setColumnValue = setNullableColumn(setBigDecimalColumn)(_, _, _)
+  def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getBigDecimalColumn)(rs, column)
+  def setColumnValue(index: Int, value: Option[BigDecimal], ps: PreparedStatement) = setNullableColumn(setBigDecimalColumn)(index, value, ps)
 }
 
 object NotNullableBigDecimal extends SqlType[BigDecimal] {
-//  val typeSql = Types.DECIMAL
-  val getColumnValue = getNotNullableColumn(getBigDecimalColumn)(_, _)
-  val setColumnValue = setNotNullableColumn(setBigDecimalColumn)(_, _, _)
+  def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getBigDecimalColumn)(rs, column)
+  def setColumnValue(index: Int, value: BigDecimal, ps: PreparedStatement) = setNotNullableColumn(setBigDecimalColumn)(index, value, ps)
 }
