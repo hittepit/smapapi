@@ -60,12 +60,12 @@ trait SqlType[T] {
   def setColumnValue(index: Int, value: T, ps: PreparedStatement): Unit
 }
 
-object NullableVarchar extends SqlType[Option[String]] {
+object NullableString extends SqlType[Option[String]] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getStringColumn)(rs, column)
   def setColumnValue(index: Int, value: Option[String], ps: PreparedStatement) = setNullableColumn(setStringColumn)(index, value, ps)
 }
 
-object NotNullableVarchar extends SqlType[String] {
+object NotNullableString extends SqlType[String] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getStringColumn)(rs, column)
   def setColumnValue(index: Int, value: String, ps: PreparedStatement) = setNotNullableColumn(setStringColumn)(index, value, ps)
 }
@@ -90,12 +90,12 @@ object NotNullableBlob extends SqlType[Blob] {
   def setColumnValue(index: Int, value: Blob, ps: PreparedStatement) = setNotNullableColumn(setBlobColumn)(index, value, ps)
 }
 
-object NullableInteger extends SqlType[Option[Int]] {
+object NullableInt extends SqlType[Option[Int]] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getIntColumn)(rs, column)
   def setColumnValue(index: Int, value: Option[Int], ps: PreparedStatement) = setNullableColumn(setIntColumn)(index, value, ps)
 }
 
-object NotNullableInteger extends SqlType[Int] {
+object NotNullableInt extends SqlType[Int] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getIntColumn)(rs, column)
   def setColumnValue(index: Int, value: Int, ps: PreparedStatement) = setNotNullableColumn(setIntColumn)(index, value, ps)
 }

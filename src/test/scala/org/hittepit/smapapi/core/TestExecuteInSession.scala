@@ -45,7 +45,7 @@ class TestExecuteInSession extends WordSpec with BeforeAndAfter with MustMatcher
         val connection = ds.getConnection()
         val session = new Session(connection)
         
-        session.execute("update TEST set name=? where id=?",List(Param("Updated",NotNullableVarchar),Param(1,NotNullableInteger)))
+        session.execute("update TEST set name=? where id=?",List(Param("Updated",NotNullableString),Param(1,NotNullableInt)))
         
         val ps = connection.prepareStatement("select * from test where id = ?")
         ps.setInt(1, 1)
@@ -59,7 +59,7 @@ class TestExecuteInSession extends WordSpec with BeforeAndAfter with MustMatcher
         val connection = ds.getConnection()
         val session = new Session(connection)
         
-        val updatedRows = session.execute("update TEST set name=? where id=?",List(Param("Updated",NotNullableVarchar),Param(1,NotNullableInteger)))
+        val updatedRows = session.execute("update TEST set name=? where id=?",List(Param("Updated",NotNullableString),Param(1,NotNullableInt)))
 
         updatedRows must be(1)
         
@@ -70,7 +70,7 @@ class TestExecuteInSession extends WordSpec with BeforeAndAfter with MustMatcher
         val connection = ds.getConnection()
         val session = new Session(connection)
         
-        val updatedRows = session.execute("update TEST set name=? where id=?",List(Param("Updated",NotNullableVarchar),Param(1000,NotNullableInteger)))
+        val updatedRows = session.execute("update TEST set name=? where id=?",List(Param("Updated",NotNullableString),Param(1000,NotNullableInt)))
 
         updatedRows must be(0)
         
@@ -83,7 +83,7 @@ class TestExecuteInSession extends WordSpec with BeforeAndAfter with MustMatcher
         val connection = ds.getConnection()
         val session = new Session(connection)
         
-        session.execute("delete from TEST where id=?",List(Param(1,NotNullableInteger)))
+        session.execute("delete from TEST where id=?",List(Param(1,NotNullableInt)))
         
         val ps = connection.prepareStatement("select * from test where id = ?")
         ps.setInt(1, 1)
@@ -96,7 +96,7 @@ class TestExecuteInSession extends WordSpec with BeforeAndAfter with MustMatcher
         val connection = ds.getConnection()
         val session = new Session(connection)
         
-        val affectedRows = session.execute("delete from TEST where id=?",List(Param(1,NotNullableInteger)))
+        val affectedRows = session.execute("delete from TEST where id=?",List(Param(1,NotNullableInt)))
         
         affectedRows must be(1)
         
@@ -107,7 +107,7 @@ class TestExecuteInSession extends WordSpec with BeforeAndAfter with MustMatcher
         val connection = ds.getConnection()
         val session = new Session(connection)
         
-        val affectedRows = session.execute("delete from TEST where id=?",List(Param(1000,NotNullableInteger)))
+        val affectedRows = session.execute("delete from TEST where id=?",List(Param(1000,NotNullableInt)))
         
         affectedRows must be(0)
         
@@ -120,7 +120,7 @@ class TestExecuteInSession extends WordSpec with BeforeAndAfter with MustMatcher
         val connection = ds.getConnection()
         val session = new Session(connection)
         
-        session.execute("insert into TEST (id,name) values (?,?)",List(Param(1000,NotNullableInteger),Param("hello",NotNullableVarchar)))
+        session.execute("insert into TEST (id,name) values (?,?)",List(Param(1000,NotNullableInt),Param("hello",NotNullableString)))
         
         val ps = connection.prepareStatement("select * from test where id = ?")
         ps.setInt(1, 1000)
@@ -135,7 +135,7 @@ class TestExecuteInSession extends WordSpec with BeforeAndAfter with MustMatcher
         val connection = ds.getConnection()
         val session = new Session(connection)
         
-        val n = session.execute("insert into TEST (id,name) values (?,?)",List(Param(1001,NotNullableInteger),Param("hello again",NotNullableVarchar)))
+        val n = session.execute("insert into TEST (id,name) values (?,?)",List(Param(1001,NotNullableInt),Param("hello again",NotNullableString)))
         
         session.rollback
   

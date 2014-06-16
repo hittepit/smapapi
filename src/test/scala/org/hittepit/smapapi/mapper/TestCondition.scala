@@ -8,17 +8,17 @@ import org.mockito.Mockito._
 import org.mockito.Matchers._
 import org.hittepit.smapapi.mapper.Condition._
 import org.hittepit.smapapi.core.Param
-import org.hittepit.smapapi.core.NotNullableVarchar
+import org.hittepit.smapapi.core.NotNullableString
 
 class TestCondition extends WordSpec with MustMatchers with MockitoSugar {
   val prop1 = new EqualsCondition(
-    new ColumnDefinition("prop1",NotNullableVarchar,{ x: Any => throw new Exception("Not used") }), "test1")
+    new ColumnDefinition("prop1",NotNullableString,{ x: Any => throw new Exception("Not used") }), "test1")
   val prop2 = new EqualsCondition(
-    new ColumnDefinition("prop2",NotNullableVarchar,{ x: Any => throw new Exception("Not used") }), "test2")
+    new ColumnDefinition("prop2",NotNullableString,{ x: Any => throw new Exception("Not used") }), "test2")
   val prop3 = new EqualsCondition(
-    new ColumnDefinition("prop3",NotNullableVarchar,{ x: Any => throw new Exception("Not used") }), "test3")
+    new ColumnDefinition("prop3",NotNullableString,{ x: Any => throw new Exception("Not used") }), "test3")
   val prop4 = new EqualsCondition(
-    new ColumnDefinition("prop4",NotNullableVarchar,{ x: Any => throw new Exception("Not used") }), "test4")
+    new ColumnDefinition("prop4",NotNullableString,{ x: Any => throw new Exception("Not used") }), "test4")
   val and1 = and(prop1, prop2, prop3)
   trait TestEnvironment {
     val ps = mock[PreparedStatement]

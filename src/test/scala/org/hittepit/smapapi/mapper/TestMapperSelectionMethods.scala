@@ -11,8 +11,8 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.BeforeAndAfter
 import org.hittepit.smapapi.transaction.TransactionManager
 import org.hittepit.smapapi.core.Param
-import org.hittepit.smapapi.core.NullableVarchar
-import org.hittepit.smapapi.core.NotNullableVarchar
+import org.hittepit.smapapi.core.NullableString
+import org.hittepit.smapapi.core.NotNullableString
 import org.hittepit.smapapi.core.NotNullableDouble
 import org.hittepit.smapapi.core.result.Row
 
@@ -120,8 +120,8 @@ class TestMapperSelectionMethods extends WordSpec with MustMatchers with Mockito
         val condition = and(Condition.like(mapper.title, "Test%"), gt(mapper.price, 5.0))
         val projection = Projection((Some("t"), mapper.title), (Some("a"), mapper.author))
         val mapTuple: Row => (String, Option[String]) = r => {
-          val title = r.getColumnValue("t",NotNullableVarchar)
-          val author = r.getColumnValue("a",NullableVarchar)
+          val title = r.getColumnValue("t",NotNullableString)
+          val author = r.getColumnValue("a",NullableString)
           (title, author)
         }
 
@@ -135,9 +135,9 @@ class TestMapperSelectionMethods extends WordSpec with MustMatchers with Mockito
     
     "with a sql string, a list of params and a mapper" must {
       "return a list of mapped objects" in readOnly {con =>
-        val select = mapper.select("select sum(price) as total, author from book where author like ? group by author",List(Param("to%",NotNullableVarchar)))
+        val select = mapper.select("select sum(price) as total, author from book where author like ? group by author",List(Param("to%",NotNullableString)))
         val tuples = select map { row =>
-          (row.getColumnValue("total",NotNullableDouble),row.getColumnValue("author",NotNullableVarchar))
+          (row.getColumnValue("total",NotNullableDouble),row.getColumnValue("author",NotNullableString))
         }
         
         tuples.size must be(1)

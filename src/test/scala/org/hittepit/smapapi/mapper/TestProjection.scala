@@ -2,13 +2,13 @@ package org.hittepit.smapapi.mapper
 
 import org.scalatest.WordSpec
 import org.scalatest.MustMatchers
-import org.hittepit.smapapi.core.NotNullableVarchar
+import org.hittepit.smapapi.core.NotNullableString
 
 class TestProjection extends WordSpec with MustMatchers {
-  val c1 = new ColumnDefinition("c1", NotNullableVarchar, { x: Any => throw new Exception("Not used") })
-  val c2 = new ColumnDefinition("c2", NotNullableVarchar, { x: Any => throw new Exception("Not used") })
-  val c3 = new ColumnDefinition("c3", NotNullableVarchar, { x: Any => throw new Exception("Not used") })
-  val c4 = new ColumnDefinition("c4", NotNullableVarchar, { x: Any => throw new Exception("Not used") })
+  val c1 = new ColumnDefinition("c1", NotNullableString, { x: Any => throw new Exception("Not used") })
+  val c2 = new ColumnDefinition("c2", NotNullableString, { x: Any => throw new Exception("Not used") })
+  val c3 = new ColumnDefinition("c3", NotNullableString, { x: Any => throw new Exception("Not used") })
+  val c4 = new ColumnDefinition("c4", NotNullableString, { x: Any => throw new Exception("Not used") })
 
   "A projection" when {
     "created with a simple column" must {

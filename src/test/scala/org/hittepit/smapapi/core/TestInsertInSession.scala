@@ -45,7 +45,7 @@ class TestInsertInSession extends WordSpec with BeforeAndAfter with MustMatchers
         val connection = ds.getConnection()
         val session = new Session(connection)
         
-        val valueGenerated = session.insert("insert into TEST (name) values (?)",List(Param("toto",NotNullableVarchar)),Column("id",NotNullableInteger))
+        val valueGenerated = session.insert("insert into TEST (name) values (?)",List(Param("toto",NotNullableString)),Column("id",NotNullableInt))
   
         valueGenerated must be('defined)
         
@@ -57,7 +57,7 @@ class TestInsertInSession extends WordSpec with BeforeAndAfter with MustMatchers
         val connection = ds.getConnection()
         val session = new Session(connection)
         
-        val valueGenerated = session.insert("insert into TEST (name) values (?)",List(Param("hello",NotNullableVarchar)),Column("id",NotNullableInteger))
+        val valueGenerated = session.insert("insert into TEST (name) values (?)",List(Param("hello",NotNullableString)),Column("id",NotNullableInt))
         
         valueGenerated must be('defined)
         val id = valueGenerated.get
@@ -79,7 +79,7 @@ class TestInsertInSession extends WordSpec with BeforeAndAfter with MustMatchers
         val connection = ds.getConnection()
         val session = new Session(connection)
         
-        session.insert("insert into TEST (id,name) values (?,?)",List(Param(1000,NotNullableInteger),Param("hello again",NotNullableVarchar)))
+        session.insert("insert into TEST (id,name) values (?,?)",List(Param(1000,NotNullableInt),Param("hello again",NotNullableString)))
         
         val ps = connection.prepareStatement("select * from test where id = ?")
         ps.setInt(1, 1000)
