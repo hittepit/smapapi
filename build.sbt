@@ -2,7 +2,7 @@ name := "SmapApi"
 
 version := "0.1.1"
 
-organization := "Hittepit Software"
+organization := "org.hittepit"
 
 scalaVersion := "2.10.3"
 
