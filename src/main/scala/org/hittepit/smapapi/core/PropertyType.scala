@@ -55,77 +55,77 @@ object Sql {
 
 import Sql._
 
-trait SqlType[T] {
+trait PropertyType[T] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]): T
   def setColumnValue(index: Int, value: T, ps: PreparedStatement): Unit
 }
 
-object NullableString extends SqlType[Option[String]] {
+object NullableString extends PropertyType[Option[String]] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getStringColumn)(rs, column)
   def setColumnValue(index: Int, value: Option[String], ps: PreparedStatement) = setNullableColumn(setStringColumn)(index, value, ps)
 }
 
-object NotNullableString extends SqlType[String] {
+object NotNullableString extends PropertyType[String] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getStringColumn)(rs, column)
   def setColumnValue(index: Int, value: String, ps: PreparedStatement) = setNotNullableColumn(setStringColumn)(index, value, ps)
 }
 
-object NullableClob extends SqlType[Option[Clob]] {
+object NullableClob extends PropertyType[Option[Clob]] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getClobColumn)(rs, column)
   def setColumnValue(index: Int, value: Option[Clob], ps: PreparedStatement) = setNullableColumn(setClobColumn)(index, value, ps)
 }
 
-object NotNullableClob extends SqlType[Clob] {
+object NotNullableClob extends PropertyType[Clob] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getClobColumn)(rs, column)
   def setColumnValue(index: Int, value: Clob, ps: PreparedStatement) = setNotNullableColumn(setClobColumn)(index, value, ps)
 }
 
-object NullableBlob extends SqlType[Option[Blob]] {
+object NullableBlob extends PropertyType[Option[Blob]] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getBlobColumn)(rs, column)
   def setColumnValue(index: Int, value: Option[Blob], ps: PreparedStatement) = setNullableColumn(setBlobColumn)(index, value, ps)
 }
 
-object NotNullableBlob extends SqlType[Blob] {
+object NotNullableBlob extends PropertyType[Blob] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getBlobColumn)(rs, column)
   def setColumnValue(index: Int, value: Blob, ps: PreparedStatement) = setNotNullableColumn(setBlobColumn)(index, value, ps)
 }
 
-object NullableInt extends SqlType[Option[Int]] {
+object NullableInt extends PropertyType[Option[Int]] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getIntColumn)(rs, column)
   def setColumnValue(index: Int, value: Option[Int], ps: PreparedStatement) = setNullableColumn(setIntColumn)(index, value, ps)
 }
 
-object NotNullableInt extends SqlType[Int] {
+object NotNullableInt extends PropertyType[Int] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getIntColumn)(rs, column)
   def setColumnValue(index: Int, value: Int, ps: PreparedStatement) = setNotNullableColumn(setIntColumn)(index, value, ps)
 }
 
-object NullableDouble extends SqlType[Option[Double]] {
+object NullableDouble extends PropertyType[Option[Double]] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getDoubleColumn)(rs, column)
   def setColumnValue(index: Int, value: Option[Double], ps: PreparedStatement) = setNullableColumn(setDoubleColumn)(index, value, ps)
 }
 
-object NotNullableDouble extends SqlType[Double] {
+object NotNullableDouble extends PropertyType[Double] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getDoubleColumn)(rs, column)
   def setColumnValue(index: Int, value: Double, ps: PreparedStatement) = setNotNullableColumn(setDoubleColumn)(index, value, ps)
 }
 
-object NullableBoolean extends SqlType[Option[Boolean]] {
+object NullableBoolean extends PropertyType[Option[Boolean]] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getBooleanColumn)(rs, column)
   def setColumnValue(index: Int, value: Option[Boolean], ps: PreparedStatement) = setNullableColumn(setBooleanColumn)(index, value, ps)
 }
 
-object NotNullableBoolean extends SqlType[Boolean] {
+object NotNullableBoolean extends PropertyType[Boolean] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getBooleanColumn)(rs, column)
   def setColumnValue(index: Int, value: Boolean, ps: PreparedStatement) = setNotNullableColumn(setBooleanColumn)(index, value, ps)
 }
 
-object NullableBigDecimal extends SqlType[Option[BigDecimal]] {
+object NullableBigDecimal extends PropertyType[Option[BigDecimal]] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getBigDecimalColumn)(rs, column)
   def setColumnValue(index: Int, value: Option[BigDecimal], ps: PreparedStatement) = setNullableColumn(setBigDecimalColumn)(index, value, ps)
 }
 
-object NotNullableBigDecimal extends SqlType[BigDecimal] {
+object NotNullableBigDecimal extends PropertyType[BigDecimal] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getBigDecimalColumn)(rs, column)
   def setColumnValue(index: Int, value: BigDecimal, ps: PreparedStatement) = setNotNullableColumn(setBigDecimalColumn)(index, value, ps)
 }

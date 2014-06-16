@@ -11,7 +11,7 @@ import java.sql.Types
 import org.hittepit.smapapi.core.NullableString
 import org.hittepit.smapapi.core.NotNullableString
 
-class TestStringSqlType extends WordSpec with MustMatchers with MockitoSugar {
+class TestStringPropertyType extends WordSpec with MustMatchers with MockitoSugar {
 	"The columnValue method of a NotNullableVarchar" when {
 	  "called for a varchar column containing a not null value" must {
 	    "return a String with the value" in {

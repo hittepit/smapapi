@@ -12,36 +12,36 @@ import org.hittepit.smapapi.core.result.Row
  * 
  * @constructor Crée un objet Param
  * @param value la valeur du paramètre
- * @param sqlType le type sql du paramètre
+ * @param PropertyType le type sql du paramètre
  * 
  */
-case class Param[T](value: T, sqlType: SqlType[T])
+case class Param[T](value: T, PropertyType: PropertyType[T])
 
 /**
  * Définition d'un colonne. Elle permet de récupérer une valeur dans un ResultSet.
  * 
  * La colonne peut être définie soit par son index dans le ResultSet, soit par son nom.
  */
-class Column[T] private(n:Option[String], i:Option[Int], st:SqlType[T]){
+class Column[T] private(n:Option[String], i:Option[Int], st:PropertyType[T]){
   /**
    * Crée une colonne pouvant être retrouvée via son nom
    * @param columnName le nom de la colonne
-   * @param sqlType le SqlType correspondant à la colonne
+   * @param PropertyType le PropertyType correspondant à la colonne
    */
-  def this(columnName:String,sqlType:SqlType[T]) = this(Some(columnName),None,sqlType)
+  def this(columnName:String,PropertyType:PropertyType[T]) = this(Some(columnName),None,PropertyType)
   /**
    * Crée une colonne pouvant être retrouvée via son nom
    * @param columnIndex l'index de la colonne (à partir de 1)
-   * @param sqlType le SqlType correspondant à la colonne
+   * @param PropertyType le PropertyType correspondant à la colonne
    */
-  def this(columnIndex:Int,sqlType:SqlType[T]) = this(None, Some(columnIndex),sqlType)
+  def this(columnIndex:Int,PropertyType:PropertyType[T]) = this(None, Some(columnIndex),PropertyType)
   
   /** Le nom de la colonne dans le ResultSet, si défini*/
   val name = n
   /** L'index de la colonne dans le ResultSet, si défini*/
   val index = i
   /** Le type Sql de la colonne dans le ResultSet */
-  val sqlType = st
+  val PropertyType = st
 }
 
 /**
@@ -51,26 +51,26 @@ object Column{
   /**
    * Construit un objet [[Column]] à partir de son nom dans le ResultSet.
    * @param name nom de la colonne dans le ResultSet
-   * @param sqlType type Sql de la colonne
+   * @param PropertyType type Sql de la colonne
    */
-  def apply[T](name:String,sqlType:SqlType[T]) = new Column(name,sqlType)
+  def apply[T](name:String,PropertyType:PropertyType[T]) = new Column(name,PropertyType)
   /**
    * Construit un objet [[Column]] à partir de son index (à partir de 1) dans le ResultSet.
    * @param index index de la colonne dans le ResultSet
-   * @param sqlType type Sql de la colonne
+   * @param PropertyType type Sql de la colonne
    */
-  def apply[T](index:Int,sqlType:SqlType[T]) = new Column(index,sqlType)
+  def apply[T](index:Int,PropertyType:PropertyType[T]) = new Column(index,PropertyType)
   
   /**
    * Extracteur pour la class [[Column]]
    * @param column l'objet [[Column]] à pattern matcher
    * @return une option contenant un tuple, 
-   *  - (Int,SqlType) si c'est une colonne définie sur base de son index
-   *  - (String,SqlType) si c'est une colonne définie sur base de son nom
+   *  - (Int,PropertyType) si c'est une colonne définie sur base de son index
+   *  - (String,PropertyType) si c'est une colonne définie sur base de son nom
    */
-  def unapply[T](column:Column[T]):Option[(_,SqlType[T])] = column.name match {
-    case Some(n) => Some(n,column.sqlType)
-    case None => Some(column.index.get,column.sqlType)
+  def unapply[T](column:Column[T]):Option[(_,PropertyType[T])] = column.name match {
+    case Some(n) => Some(n,column.PropertyType)
+    case None => Some(column.index.get,column.PropertyType)
   }
 }
 
@@ -92,7 +92,7 @@ class Session(val connection: Connection) {
 
     params.zipWithIndex.foreach {
       _ match {
-        case (param: Param[_], index) => param.sqlType.setColumnValue(index + 1, param.value, ps)
+        case (param: Param[_], index) => param.PropertyType.setColumnValue(index + 1, param.value, ps)
       }
     }
 
@@ -130,27 +130,27 @@ class Session(val connection: Connection) {
   
   private def insert[T](sql: String, params: List[Param[_]], generatedId: Option[Column[T]]): Option[T] = {
     val ps = generatedId match {
-      case Some(Column(name:String, sqlType)) => connection.prepareStatement(sql, Array(name))
-      case Some(Column(index:Int, sqlType)) => throw new NotImplementedError
+      case Some(Column(name:String, propertyType)) => connection.prepareStatement(sql, Array(name))
+      case Some(Column(index:Int, propertyType)) => throw new NotImplementedError
       case _ => connection.prepareStatement(sql)
     }
 
     params.zipWithIndex.foreach {
       _ match {
-        case (param: Param[_], index) => param.sqlType.setColumnValue(index + 1, param.value, ps)
+        case (param: Param[_], index) => param.PropertyType.setColumnValue(index + 1, param.value, ps)
       }
     }
 
     ps.executeUpdate()
     generatedId match {
-      case Some(Column(name:String, sqlType)) =>
+      case Some(Column(name:String, propertyType)) =>
         val queryResult = new QueryResult(ps.getGeneratedKeys())
-        queryResult.map { row => row.getColumnValue(1, sqlType) } match {
+        queryResult.map { row => row.getColumnValue(1, propertyType) } match {
           case List(m) => Some(m)
           case List() => None
           case _ => throw new Exception("Multiple generated objects")
         }
-      case Some(Column(index:Int, sqlType)) => throw new NotImplementedError
+      case Some(Column(index:Int, propertyType)) => throw new NotImplementedError
       case None => None
     }
   }
@@ -159,7 +159,7 @@ class Session(val connection: Connection) {
     val ps = connection.prepareStatement(sql)
     params.zipWithIndex.foreach {
       _ match {
-        case (param: Param[_], index) => param.sqlType.setColumnValue(index + 1, param.value, ps)
+        case (param: Param[_], index) => param.PropertyType.setColumnValue(index + 1, param.value, ps)
       }
     }
     ps.executeUpdate()

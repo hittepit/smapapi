@@ -15,11 +15,11 @@ class TestColumnDefObject extends WordSpec with MustMatchers with  MockitoSugar{
   val mapper = new BookMapper(mock[TransactionManager])
 
   "The Column:apply method" when{
-    "invoked with a name and a SqlType" must {
+    "invoked with a name and a PropertyType" must {
       "return a initialzed ColumnDef" in {
         val c = Column("test",NotNullableString)
         c.name must be (Some("test"))
-        c.sqlType must be(NotNullableString)
+        c.PropertyType must be(NotNullableString)
       }
     }
   }
@@ -31,7 +31,7 @@ class TestColumnDefObject extends WordSpec with MustMatchers with  MockitoSugar{
         val getter = (b:Book) => b.title
         val cdef = mapper.columnToColumnDef(c) <~ getter
         cdef.name must be("test")
-        cdef.sqlType must be(NotNullableString)
+        cdef.PropertyType must be(NotNullableString)
         cdef.getter must be(getter)
       }
     }
@@ -46,7 +46,7 @@ class TestColumnDefObject extends WordSpec with MustMatchers with  MockitoSugar{
 
         val primaryKey = mapper.PrimaryKey(cdef)
         primaryKey.name must be("test")
-        primaryKey.sqlType must be(NotNullableString)
+        primaryKey.PropertyType must be(NotNullableString)
         primaryKey.getter must be(getter)
       }
     }
@@ -64,7 +64,7 @@ class TestColumnDefObject extends WordSpec with MustMatchers with  MockitoSugar{
         val auto = primaryKey ~> setter
         
         auto.name must be("test")
-        auto.sqlType must be(NotNullableString)
+        auto.PropertyType must be(NotNullableString)
         auto.getter must be(getter)
         auto.setter must be(setter)
       }

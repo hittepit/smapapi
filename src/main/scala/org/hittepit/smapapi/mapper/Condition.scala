@@ -46,7 +46,7 @@ class SqlCondition(sql:String, params:List[Param[_]]) extends Condition {
 //  def setParameter(index:Int, ps:PreparedStatement) = {
 //    var i = index
 //    params.foreach{_ match {
-//      case Param(value,sqlType) => sqlType.setColumnValue(i+1,value,ps)
+//      case Param(value,PropertyType) => PropertyType.setColumnValue(i+1,value,ps)
 //    		  						i = i+1
 //    } }
 //    i
@@ -60,11 +60,11 @@ class EqualsCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
 	def sqlString() = c.name+"=?"
 	
 //	def setParameter(index:Int, ps:PreparedStatement) = {
-//	  c.sqlType.setColumnValue(index+1, value,ps)
+//	  c.PropertyType.setColumnValue(index+1, value,ps)
 //	  index+1
 //	}
 	
-	def getParams = List(Param(value,c.sqlType))
+	def getParams = List(Param(value,c.PropertyType))
 }
 
 class NotEqualsCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
@@ -72,10 +72,10 @@ class NotEqualsCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
 	def sqlString() = c.name+"<>?"
 	
 //	def setParameter(index:Int, ps:PreparedStatement) = {
-//	  c.sqlType.setColumnValue(index+1, value,ps)
+//	  c.PropertyType.setColumnValue(index+1, value,ps)
 //	  index+1
 //	}
-	def getParams = List(Param(value,c.sqlType))
+	def getParams = List(Param(value,c.PropertyType))
 }
 
 class LikeCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
@@ -83,10 +83,10 @@ class LikeCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
 	def sqlString() = c.name+" like ?"
 	
 //	def setParameter(index:Int, ps:PreparedStatement) = {
-//	  c.sqlType.setColumnValue(index+1, value,ps)
+//	  c.PropertyType.setColumnValue(index+1, value,ps)
 //	  index+1
 //	}
-	def getParams = List(Param(value,c.sqlType))
+	def getParams = List(Param(value,c.PropertyType))
 }
 
 class GreaterThanCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
@@ -94,10 +94,10 @@ class GreaterThanCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition
 	def sqlString() = c.name+">?"
 	
 //	def setParameter(index:Int, ps:PreparedStatement) = {
-//	  c.sqlType.setColumnValue(index+1, value,ps)
+//	  c.PropertyType.setColumnValue(index+1, value,ps)
 //	  index+1
 //	}
-	def getParams = List(Param(value,c.sqlType))
+	def getParams = List(Param(value,c.PropertyType))
 }
 
 class GreaterOrEqualsCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
@@ -105,10 +105,10 @@ class GreaterOrEqualsCondition[P](c:ColumnDefinition[_,P],value:P) extends Condi
 	def sqlString() = c.name+">=?"
 	
 //	def setParameter(index:Int, ps:PreparedStatement) = {
-//	  c.sqlType.setColumnValue(index+1, value,ps)
+//	  c.PropertyType.setColumnValue(index+1, value,ps)
 //	  index+1
 //	}
-	def getParams = List(Param(value,c.sqlType))
+	def getParams = List(Param(value,c.PropertyType))
 }
 
 class LowerThanCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
@@ -116,10 +116,10 @@ class LowerThanCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
 	def sqlString() = c.name+"<?"
 	
 //	def setParameter(index:Int, ps:PreparedStatement) = {
-//	  c.sqlType.setColumnValue(index+1, value,ps)
+//	  c.PropertyType.setColumnValue(index+1, value,ps)
 //	  index+1
 //	}
-	def getParams = List(Param(value,c.sqlType))
+	def getParams = List(Param(value,c.PropertyType))
 }
 
 class LowerOrEqualsCondition[P](c:ColumnDefinition[_,P],value:P) extends Condition {
@@ -127,10 +127,10 @@ class LowerOrEqualsCondition[P](c:ColumnDefinition[_,P],value:P) extends Conditi
 	def sqlString() = c.name+"<=?"
 	
 //	def setParameter(index:Int, ps:PreparedStatement) = {
-//	  c.sqlType.setColumnValue(index+1, value,ps)
+//	  c.PropertyType.setColumnValue(index+1, value,ps)
 //	  index+1
 //	}
-	def getParams = List(Param(value,c.sqlType))
+	def getParams = List(Param(value,c.PropertyType))
 }
 
 class BetweenCondition[P](c:ColumnDefinition[_,P],v1:P,v2:P) extends Condition {
@@ -139,11 +139,11 @@ class BetweenCondition[P](c:ColumnDefinition[_,P],v1:P,v2:P) extends Condition {
   def sqlString = c.name+" between ? and ?"
   
 //  def setParameter(index:Int, ps:PreparedStatement) = {
-//    c.sqlType.setColumnValue(index+1, v1,ps)
-//    c.sqlType.setColumnValue(index+2, v2,ps)
+//    c.PropertyType.setColumnValue(index+1, v1,ps)
+//    c.PropertyType.setColumnValue(index+2, v2,ps)
 //    index+2
 //  }
-	def getParams = List(Param(v1,c.sqlType),Param(v2,c.sqlType))
+	def getParams = List(Param(v1,c.PropertyType),Param(v2,c.PropertyType))
 }
 
 class InCondition[P](c:ColumnDefinition[_,P],values:Seq[P]) extends Condition{
@@ -154,12 +154,12 @@ class InCondition[P](c:ColumnDefinition[_,P],values:Seq[P]) extends Condition{
 //  def setParameter(index:Int, ps:PreparedStatement) = {
 //    var newIndex = index
 //    values.foreach{v => newIndex = newIndex+1
-//      				c.sqlType.setColumnValue(newIndex,v,ps)
+//      				c.PropertyType.setColumnValue(newIndex,v,ps)
 //      				}
 //    newIndex
 //  }
   
-  def getParams = values.map({v => Param(v,c.sqlType)}).toList
+  def getParams = values.map({v => Param(v,c.PropertyType)}).toList
 }
 
 class IsNullCondition(c:ColumnDefinition[_,_]) extends Condition {

@@ -1,6 +1,6 @@
 package org.hittepit.smapapi.core.result
 
-import org.hittepit.smapapi.core.SqlType
+import org.hittepit.smapapi.core.PropertyType
 import java.sql.ResultSet
 
 /**
@@ -38,16 +38,16 @@ class Row private[result](resultSet: ResultSet) {
   /**
    * Retourne la valeur d'une colonne dans un ResultSet à partir de son index
    * @param index index de la colonne
-   * @param sqlType le type sql de la Colonne
+   * @param PropertyType le type sql de la Colonne
    * @return la valeur de la colonne
    */
-  def getColumnValue[T](index: Int, sqlType: SqlType[T]) = sqlType.getColumnValue(resultSet, Right(index))
+  def getColumnValue[T](index: Int, PropertyType: PropertyType[T]) = PropertyType.getColumnValue(resultSet, Right(index))
   
   /**
    * Retourne la valeur d'une colonne dans un ResultSet à partir de son nom
    * @param columnName nom de la colonne
-   * @param sqlType le type sql de la Colonne
+   * @param PropertyType le type sql de la Colonne
    * @return la valeur de la colonne
    */
-  def getColumnValue[T](columnName: String, sqlType: SqlType[T]) = sqlType.getColumnValue(resultSet, Left(columnName))
+  def getColumnValue[T](columnName: String, PropertyType: PropertyType[T]) = PropertyType.getColumnValue(resultSet, Left(columnName))
 }

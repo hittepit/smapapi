@@ -10,7 +10,7 @@ import java.sql.Types
 import org.hittepit.smapapi.core.NullableInt
 import org.hittepit.smapapi.core.NotNullableInt
 
-class TestIntSqlType extends WordSpec with MustMatchers with MockitoSugar{
+class TestIntPropertyType extends WordSpec with MustMatchers with MockitoSugar{
 	"The columnValue method of a  NotNullableInteger" when {
 	  "called for an integer column containing a not null value" must {
 	    "return an Int of the value" in {
