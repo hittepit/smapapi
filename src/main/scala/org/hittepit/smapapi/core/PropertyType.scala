@@ -3,35 +3,68 @@ package org.hittepit.smapapi.core
 import java.sql.ResultSet
 import java.sql.PreparedStatement
 import java.sql.Types
-import org.hittepit.smapapi.mapper.NullValueException
 import java.sql.Clob
 import java.sql.Blob
 
+/**
+ * Regroupe les méthodes de base pour accéder aux colonnes d'un ResultSet ou d'écrire les paramètres d'un PreparedStatement
+ */
 object Sql {
+  /** Type pour la définition de méthodes permettant de récupérer un valeur dans un ResultSet */
   type ColumnGetter[T] = ((ResultSet, Int) => T, (ResultSet, String) => T)
+  /** Type pour la définition de méthodes permettant d'injecter une valeur dans un PreparedStatement */
   type ColumnSetter[T] = ((PreparedStatement, Int, T) => Unit, Int)
 
-  def getNullableColumn[T](getter: ColumnGetter[T])(rs: ResultSet, colonne: Either[String, Int]): Option[T] = {
-    val v = colonne match {
+  /**
+   * Méthode permettant la récupération d'une valeur dans une colonne Nullable de ResultSet
+   * @param getter une méthode permettant de récupérer une valeur dans le ResultSet
+   * @param rs le ResultSet
+   * @param column soit le nom de la colonne, soit son index
+   * @return une option contenant la valeur de la colonne ou valant None si la colonne est null
+   */
+  def getNullableColumn[T](getter: ColumnGetter[T])(rs: ResultSet, column: Either[String, Int]): Option[T] = {
+    val v = column match {
       case Left(c) => getter._2(rs, c)
       case Right(c) => getter._1(rs, c)
     }
     if (rs.wasNull()) None else Some(v)
   }
 
-  def getNotNullableColumn[T](getter: ColumnGetter[T])(rs: ResultSet, colonne: Either[String, Int]): T = {
-    val v = colonne match {
+  /**
+   * Méthode permettant la récupération d'une valeur dans une colonne non Nullable de ResultSet
+   * @param getter une méthode permettant de récupérer une valeur dans le ResultSet
+   * @param rs le ResultSet
+   * @param column soit le nom de la colonne, soit son index
+   * @return la valeur de la colonne
+   * @throws si la colonne est nulle, [[org.hittepit.smapapi.core.NullValueException NullValueException]]
+   */
+  def getNotNullableColumn[T](getter: ColumnGetter[T])(rs: ResultSet, column: Either[String, Int]): T = {
+    val v = column match {
       case Left(c) => getter._2(rs, c)
       case Right(c) => getter._1(rs, c)
     }
     if (rs.wasNull()) throw new NullValueException else v
   }
 
+  /**
+   * Méthode permettant d'injecter une valeur optionnelle dans un PreparedStatement
+   * @param setter méthode générique permettant l'injection d'une valeur dans un PreparedStatement
+   * @param index l'index du paramètre dans le PreparedStatement
+   * @param value la valeur du paramètre. Si elle vaut None, null sera injecté comme paramètre
+   * @param ps le PreparedStatement visé
+   */
   def setNullableColumn[T](setter: ColumnSetter[T])(index: Int, value: Option[T], ps: PreparedStatement) = value match {
     case Some(v) => setter._1(ps, index, v)
     case None => ps.setNull(index, setter._2)
   }
 
+  /**
+   * Méthode permettant d'injecter une valeur dans un PreparedStatement
+   * @param setter méthode générique permettant l'injection d'une valeur dans un PreparedStatement
+   * @param index l'index du paramètre dans le PreparedStatement
+   * @param value la valeur du paramètre
+   * @param ps le PreparedStatement visé
+   */
   def setNotNullableColumn[T](setter: ColumnSetter[T])(index: Int, value: T, ps: PreparedStatement) =
     setter._1(ps, index, value)
 

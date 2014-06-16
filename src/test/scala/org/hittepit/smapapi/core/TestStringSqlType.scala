@@ -1,15 +1,12 @@
-package org.hittepit.smapapi.mapper
+package org.hittepit.smapapi.core
 
 import org.scalatest.WordSpec
 import org.scalatest.MustMatchers
 import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito._
 import java.sql.ResultSet
-import org.scalatest.GivenWhenThen
 import java.sql.PreparedStatement
 import java.sql.Types
-import org.hittepit.smapapi.core.NullableString
-import org.hittepit.smapapi.core.NotNullableString
 
 class TestStringPropertyType extends WordSpec with MustMatchers with MockitoSugar {
 	"The columnValue method of a NotNullableVarchar" when {
