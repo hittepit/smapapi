@@ -38,7 +38,7 @@ class Row private[result](resultSet: ResultSet) {
   /**
    * Retourne la valeur d'une colonne dans un ResultSet à partir de son index
    * @param index index de la colonne
-   * @param PropertyType le type sql de la Colonne
+   * @param PropertyType le type de la valeur de la Colonne
    * @return la valeur de la colonne
    */
   def getColumnValue[T](index: Int, PropertyType: PropertyType[T]) = PropertyType.getColumnValue(resultSet, Right(index))
@@ -46,7 +46,7 @@ class Row private[result](resultSet: ResultSet) {
   /**
    * Retourne la valeur d'une colonne dans un ResultSet à partir de son nom
    * @param columnName nom de la colonne
-   * @param PropertyType le type sql de la Colonne
+   * @param PropertyType le type de la valeur de la Colonne
    * @return la valeur de la colonne
    */
   def getColumnValue[T](columnName: String, PropertyType: PropertyType[T]) = PropertyType.getColumnValue(resultSet, Left(columnName))

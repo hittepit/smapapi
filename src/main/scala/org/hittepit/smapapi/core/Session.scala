@@ -12,7 +12,7 @@ import org.hittepit.smapapi.core.result.Row
  * 
  * @constructor Crée un objet Param
  * @param value la valeur du paramètre
- * @param PropertyType le type sql du paramètre
+ * @param PropertyType le type du paramètre
  * 
  */
 case class Param[T](value: T, PropertyType: PropertyType[T])
@@ -40,7 +40,7 @@ class Column[T] private(n:Option[String], i:Option[Int], st:PropertyType[T]){
   val name = n
   /** L'index de la colonne dans le ResultSet, si défini*/
   val index = i
-  /** Le type Sql de la colonne dans le ResultSet */
+  /** Le type de la valeur récupérée dans la colonne du ResultSet */
   val PropertyType = st
 }
 
@@ -51,13 +51,13 @@ object Column{
   /**
    * Construit un objet [[Column]] à partir de son nom dans le ResultSet.
    * @param name nom de la colonne dans le ResultSet
-   * @param PropertyType type Sql de la colonne
+   * @param PropertyType type de la valeur de la colonne
    */
   def apply[T](name:String,PropertyType:PropertyType[T]) = new Column(name,PropertyType)
   /**
    * Construit un objet [[Column]] à partir de son index (à partir de 1) dans le ResultSet.
    * @param index index de la colonne dans le ResultSet
-   * @param PropertyType type Sql de la colonne
+   * @param PropertyType type de la valeur de la colonne
    */
   def apply[T](index:Int,PropertyType:PropertyType[T]) = new Column(index,PropertyType)
   
