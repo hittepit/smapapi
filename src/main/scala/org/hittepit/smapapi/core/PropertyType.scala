@@ -149,6 +149,7 @@ object NullableInt extends PropertyType[Option[Int]] {
 
 object NotNullableInt extends PropertyType[Int] {
   PropertyTypes.add(classOf[Int], this)
+  PropertyTypes.add(classOf[java.lang.Integer], this.asInstanceOf[PropertyType[Integer]])
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getIntColumn)(rs, column)
   def setColumnValue(index: Int, value: Int, ps: PreparedStatement) = setNotNullableColumn(setIntColumn)(index, value, ps)
 }
