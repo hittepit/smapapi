@@ -15,7 +15,21 @@ import org.hittepit.smapapi.core.result.Row
  * @param PropertyType le type du paramètre
  * 
  */
-case class Param[T](value: T, PropertyType: PropertyType[T])
+class Param[T](val value: T, val propertyType: PropertyType[T])
+
+object Param{
+  def apply[T](value:T, propertyType: PropertyType[T]) = new Param(value,propertyType)
+  
+  def apply[T](value:T) = {
+    val t:Class[T] = value.getClass.asInstanceOf[Class[T]]
+    if(t == classOf[Some[_]]){
+      throw new Exception("Some ne fonctionne pas, utilisez Param(value,propertyType)") //TODO exception
+    }
+    new Param(value,PropertyTypes.propertyType(t))
+  }
+  
+  def unapply[T](param:Param[T]):Option[(T,PropertyType[T])] = Some(param.value,param.propertyType)
+}
 
 /**
  * Définition d'un colonne. Elle permet de récupérer une valeur dans un ResultSet.
@@ -92,7 +106,7 @@ class Session(val connection: Connection) {
 
     params.zipWithIndex.foreach {
       _ match {
-        case (param: Param[_], index) => param.PropertyType.setColumnValue(index + 1, param.value, ps)
+        case (param: Param[_], index) => param.propertyType.setColumnValue(index + 1, param.value, ps)
       }
     }
 
@@ -137,7 +151,7 @@ class Session(val connection: Connection) {
 
     params.zipWithIndex.foreach {
       _ match {
-        case (param: Param[_], index) => param.PropertyType.setColumnValue(index + 1, param.value, ps)
+        case (param: Param[_], index) => param.propertyType.setColumnValue(index + 1, param.value, ps)
       }
     }
 
@@ -159,7 +173,7 @@ class Session(val connection: Connection) {
     val ps = connection.prepareStatement(sql)
     params.zipWithIndex.foreach {
       _ match {
-        case (param: Param[_], index) => param.PropertyType.setColumnValue(index + 1, param.value, ps)
+        case (param: Param[_], index) => param.propertyType.setColumnValue(index + 1, param.value, ps)
       }
     }
     ps.executeUpdate()

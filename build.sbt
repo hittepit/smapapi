@@ -17,6 +17,8 @@ initialize := {
    println(classVersion,specVersion) //50, 1.6
 }
 
+libraryDependencies += "org.scala-lang" % "scala-reflect" % "2.10.3"
+
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.13"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.7" % "test->*" excludeAll (ExclusionRule(organization="org.junit", name="junit"))
