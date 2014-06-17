@@ -20,17 +20,6 @@ class Param[T](val value: T, val propertyType: PropertyType[T])
 object Param{
   def apply[T](value:T, propertyType: PropertyType[T]) = new Param(value,propertyType)
   
-  def apply[T](value:T) = {
-    val t:Class[T] = value.getClass.asInstanceOf[Class[T]]
-    if(t == classOf[Some[_]]){
-//      value match {
-//        case Some(i) => println("-----------------> "+i.getClass)
-//      }
-      throw new Exception("Some ne fonctionne pas, utilisez Param(value,propertyType)") //TODO exception
-    }
-    new Param(value,PropertyTypes.propertyType(t))
-  }
-  
   def unapply[T](param:Param[T]):Option[(T,PropertyType[T])] = Some(param.value,param.propertyType)
 }
 

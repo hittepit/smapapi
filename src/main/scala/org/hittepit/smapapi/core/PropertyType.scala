@@ -88,22 +88,6 @@ object Sql {
 
 import Sql._
 
-object PropertyTypes{
-  private var _propertyTypes = Map[String,PropertyType[_]]()
-  
-  def add[T](propertyClass:Class[T],propertyType:PropertyType[T]) = {
-    if(propertyClass == classOf[Some[_]]){
-      throw new Exception("Ne fonctionne pas pour des options") //TODO exception
-    }
-    _propertyTypes += propertyClass.getName() -> propertyType
-  }
-  
-  def propertyType[T](propertyClass:Class[T]) = _propertyTypes.get(propertyClass.getName) match {
-    case Some(p) => p.asInstanceOf[PropertyType[T]]
-    case None => throw new Exception("Pas de property définie pour cette classe") //TODO exxeption
-  } 
-}
-
 trait PropertyType[T] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]): T
   def setColumnValue(index: Int, value: T, ps: PreparedStatement): Unit
@@ -115,7 +99,6 @@ object NullableString extends PropertyType[Option[String]] {
 }
 
 object NotNullableString extends PropertyType[String] {
-  PropertyTypes.add(classOf[String], this)
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getStringColumn)(rs, column)
   def setColumnValue(index: Int, value: String, ps: PreparedStatement) = setNotNullableColumn(setStringColumn)(index, value, ps)
 }
@@ -126,7 +109,6 @@ object NullableClob extends PropertyType[Option[Clob]] {
 }
 
 object NotNullableClob extends PropertyType[Clob] {
-  PropertyTypes.add(classOf[Clob], this)
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getClobColumn)(rs, column)
   def setColumnValue(index: Int, value: Clob, ps: PreparedStatement) = setNotNullableColumn(setClobColumn)(index, value, ps)
 }
@@ -137,7 +119,6 @@ object NullableBlob extends PropertyType[Option[Blob]] {
 }
 
 object NotNullableBlob extends PropertyType[Blob] {
-  PropertyTypes.add(classOf[Blob], this)
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getBlobColumn)(rs, column)
   def setColumnValue(index: Int, value: Blob, ps: PreparedStatement) = setNotNullableColumn(setBlobColumn)(index, value, ps)
 }
@@ -148,8 +129,6 @@ object NullableInt extends PropertyType[Option[Int]] {
 }
 
 object NotNullableInt extends PropertyType[Int] {
-  PropertyTypes.add(classOf[Int], this)
-  PropertyTypes.add(classOf[java.lang.Integer], this.asInstanceOf[PropertyType[Integer]])
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getIntColumn)(rs, column)
   def setColumnValue(index: Int, value: Int, ps: PreparedStatement) = setNotNullableColumn(setIntColumn)(index, value, ps)
 }
@@ -160,7 +139,6 @@ object NullableDouble extends PropertyType[Option[Double]] {
 }
 
 object NotNullableDouble extends PropertyType[Double] {
-  PropertyTypes.add(classOf[Double], this)
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getDoubleColumn)(rs, column)
   def setColumnValue(index: Int, value: Double, ps: PreparedStatement) = setNotNullableColumn(setDoubleColumn)(index, value, ps)
 }
@@ -171,7 +149,6 @@ object NullableBoolean extends PropertyType[Option[Boolean]] {
 }
 
 object NotNullableBoolean extends PropertyType[Boolean] {
-  PropertyTypes.add(classOf[Boolean], this)
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getBooleanColumn)(rs, column)
   def setColumnValue(index: Int, value: Boolean, ps: PreparedStatement) = setNotNullableColumn(setBooleanColumn)(index, value, ps)
 }
@@ -182,7 +159,6 @@ object NullableBigDecimal extends PropertyType[Option[BigDecimal]] {
 }
 
 object NotNullableBigDecimal extends PropertyType[BigDecimal] {
-  PropertyTypes.add(classOf[BigDecimal], this)
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getBigDecimalColumn)(rs, column)
   def setColumnValue(index: Int, value: BigDecimal, ps: PreparedStatement) = setNotNullableColumn(setBigDecimalColumn)(index, value, ps)
 }
