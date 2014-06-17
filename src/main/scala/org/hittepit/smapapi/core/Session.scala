@@ -23,6 +23,9 @@ object Param{
   def apply[T](value:T) = {
     val t:Class[T] = value.getClass.asInstanceOf[Class[T]]
     if(t == classOf[Some[_]]){
+//      value match {
+//        case Some(i) => println("-----------------> "+i.getClass)
+//      }
       throw new Exception("Some ne fonctionne pas, utilisez Param(value,propertyType)") //TODO exception
     }
     new Param(value,PropertyTypes.propertyType(t))

@@ -89,16 +89,16 @@ object Sql {
 import Sql._
 
 object PropertyTypes{
-  private var _propertyTypes = Map[Class[_],PropertyType[_]]()
+  private var _propertyTypes = Map[String,PropertyType[_]]()
   
   def add[T](propertyClass:Class[T],propertyType:PropertyType[T]) = {
     if(propertyClass == classOf[Some[_]]){
       throw new Exception("Ne fonctionne pas pour des options") //TODO exception
     }
-    _propertyTypes += propertyClass -> propertyType
+    _propertyTypes += propertyClass.getName() -> propertyType
   }
   
-  def propertyType[T](propertyClass:Class[T]) = _propertyTypes.get(propertyClass) match {
+  def propertyType[T](propertyClass:Class[T]) = _propertyTypes.get(propertyClass.getName) match {
     case Some(p) => p.asInstanceOf[PropertyType[T]]
     case None => throw new Exception("Pas de property définie pour cette classe") //TODO exxeption
   } 
