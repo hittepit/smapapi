@@ -93,7 +93,7 @@ class Session(val connection: Connection) {
    * @param params Liste d'objet [[Param]] qui seront injectés dans le PreparedStatement.
    * @return un [[org.hittepit.smapapi.core.result.QueryResult QueryResult]]
    */
-  def select(sql: String, params: List[Param[_]]): QueryResult = {
+  def select(sql: String, params: List[Param[_]]=Nil): QueryResult = {
     val ps = connection.prepareStatement(sql)
 
     params.zipWithIndex.foreach {
@@ -112,7 +112,7 @@ class Session(val connection: Connection) {
    * @param mapper une méthode qui transforme une [[org.hittepit.smapapi.core.result.Row Row]] en objet T
    * @return une liste d'objets T
    */
-  def list[T](sql: String, params: List[Param[_]], mapper: Row => T): Seq[T] = select(sql, params) map (mapper)
+  def list[T](sql: String, params: List[Param[_]]=Nil, mapper: Row => T): Seq[T] = select(sql, params) map (mapper)
 
 
   /**
@@ -124,7 +124,7 @@ class Session(val connection: Connection) {
    * @throws Exception lorsque la requête retourne plusieurs objets
    * @todo l'exception doit être plus spécifique
    */
-  def unique[T](sql: String, params: List[Param[_]], mapper: Row => T): Option[T] = select(sql, params) map (mapper) match {
+  def unique[T](sql: String, params: List[Param[_]]=Nil, mapper: Row => T): Option[T] = select(sql, params) map (mapper) match {
     case Nil => None
     case List(t) => Some(t)
     case _ => throw new Exception("More than one result") //TODO exception 
@@ -132,7 +132,7 @@ class Session(val connection: Connection) {
 
   def insert[T](sql: String, params: List[Param[_]], generatedId: Column[T]): Option[T] = insert(sql,params,Some(generatedId))
   
-  def insert[T](sql: String, params: List[Param[_]]): Unit = insert(sql,params,None) 
+  def insert[T](sql: String, params: List[Param[_]]=Nil): Unit = insert(sql,params,None) 
   
   private def insert[T](sql: String, params: List[Param[_]], generatedId: Option[Column[T]]): Option[T] = {
     val ps = generatedId match {
@@ -161,7 +161,7 @@ class Session(val connection: Connection) {
     }
   }
   
-  def execute(sql:String, params:List[Param[_]]):Int = {
+  def execute(sql:String, params:List[Param[_]]=Nil):Int = {
     val ps = connection.prepareStatement(sql)
     params.zipWithIndex.foreach {
       _ match {
