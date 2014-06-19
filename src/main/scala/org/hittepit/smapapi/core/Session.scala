@@ -112,7 +112,7 @@ class Session(val connection: Connection) {
    * @param mapper une méthode qui transforme une [[org.hittepit.smapapi.core.result.Row Row]] en objet T
    * @return une liste d'objets T
    */
-  def select[T](sql: String, params: List[Param[_]], mapper: Row => T): Seq[T] = select(sql, params) map (mapper)
+  def list[T](sql: String, params: List[Param[_]], mapper: Row => T): Seq[T] = select(sql, params) map (mapper)
 
 
   /**

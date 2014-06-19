@@ -68,7 +68,7 @@ class TestSelectionsInSession extends WordSpec with BeforeAndAfter with MustMatc
           (row.getColumnValue("isbn", NotNullableString),row.getColumnValue("author", NullableString))
         }
         
-        val tuples = session.select("select isbn,author from book where price > ?",List(Param(5.0,NotNullableDouble)),mapper)
+        val tuples = session.list("select isbn,author from book where price > ?",List(Param(5.0,NotNullableDouble)),mapper)
         
         connection.close
         
@@ -86,7 +86,7 @@ class TestSelectionsInSession extends WordSpec with BeforeAndAfter with MustMatc
           (row.getColumnValue("isbn", NotNullableString),row.getColumnValue("author", NullableString))
         }
         
-        val tuples = session.select("select isbn,author from book where price < ?",List(Param(0.0,NotNullableDouble)),mapper)
+        val tuples = session.list("select isbn,author from book where price < ?",List(Param(0.0,NotNullableDouble)),mapper)
         
         connection.close
         
