@@ -188,8 +188,12 @@ class Session(val connection: Connection) {
   }
   
   private def checkSession[T](f : =>T) = {
-    assert(!_closed,"Session already closed")
-    logger.error("Session already closed")
-    f
+    try{
+      assert(!_closed,"Session already closed")
+      f
+    } catch {
+      case e:AssertionError => logger.error("Session already closed")
+    		  				throw e
+    }
   }
 }
