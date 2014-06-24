@@ -6,6 +6,7 @@ import java.sql.ResultSetMetaData
 import scala.collection.mutable.ArraySeq
 import org.hittepit.smapapi.core.result.QueryResult
 import org.hittepit.smapapi.core.result.Row
+import org.slf4j.LoggerFactory
 
 /**
  * Définition d'un paramètre à injecter dans un PreparedStatement.
@@ -86,6 +87,11 @@ object Column{
  * @param connection la connexion encapsulée dans la session. Une session n'utilise qu'une seule et unique connexion.
  */
 class Session(val connection: Connection) {
+  val logger = LoggerFactory.getLogger(this.getClass)
+  
+  private var _closed=false
+  
+  def closed = _closed
   /**
    * Méthode de base pour exécuter un SELECT SQL. Elle génère un ResulSet et l'encapsule dans un [[org.hittepit.smapapi.core.result.QueryResult QueryResult]].
    *  
@@ -93,7 +99,7 @@ class Session(val connection: Connection) {
    * @param params Liste d'objet [[Param]] qui seront injectés dans le PreparedStatement.
    * @return un [[org.hittepit.smapapi.core.result.QueryResult QueryResult]]
    */
-  def select(sql: String, params: List[Param[_]]=Nil): QueryResult = {
+  def select(sql: String, params: List[Param[_]]=Nil): QueryResult = checkSession{
     val ps = connection.prepareStatement(sql)
 
     params.zipWithIndex.foreach {
@@ -134,7 +140,7 @@ class Session(val connection: Connection) {
   
   def insert[T](sql: String, params: List[Param[_]]=Nil): Unit = insert(sql,params,None) 
   
-  private def insert[T](sql: String, params: List[Param[_]], generatedId: Option[Column[T]]): Option[T] = {
+  private def insert[T](sql: String, params: List[Param[_]], generatedId: Option[Column[T]]): Option[T] = checkSession{
     val ps = generatedId match {
       case Some(Column(name:String, propertyType)) => connection.prepareStatement(sql, Array(name))
       case Some(Column(index:Int, propertyType)) => throw new NotImplementedError
@@ -161,7 +167,7 @@ class Session(val connection: Connection) {
     }
   }
   
-  def execute(sql:String, params:List[Param[_]]=Nil):Int = {
+  def execute(sql:String, params:List[Param[_]]=Nil):Int = checkSession{
     val ps = connection.prepareStatement(sql)
     params.zipWithIndex.foreach {
       _ match {
@@ -171,7 +177,19 @@ class Session(val connection: Connection) {
     ps.executeUpdate()
   }
   
-  def commit() = connection.commit()
-  def rollback() = connection.rollback()
-  def close() = connection.close //TODO l'état de la session doit être clair, si elle est fermée, elle ne peut plus être utilisée
+  def commit() = checkSession {
+    connection.commit()
+  }
+  def rollback() = checkSession{connection.rollback()}
+  
+  def close() = checkSession{
+    _closed = true
+    connection.close
+  }
+  
+  private def checkSession[T](f : =>T) = {
+    assert(!_closed,"Session already closed")
+    logger.error("Session already closed")
+    f
+  }
 }
