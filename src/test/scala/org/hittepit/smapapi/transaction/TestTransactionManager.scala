@@ -25,14 +25,17 @@ class TestTransactionManager extends WordSpec with MockitoSugar with MustMatcher
 	    "create a new readOnly transaction without parent transaction" in new Transaction{
 	      val t = tm.startNestedTransaction(ReadOnly)
 	      t.isReadonly must be(true)
-	      t.getSession.connection must be(connection)
 	      t.parent must be(None)
 	    }
 	    "create a readOnlySession" in new Transaction{
 	      val t = tm.startNestedTransaction(ReadOnly)
 	      t.getSession mustBe a [ReadOnlySession]
 	      t.getSession must not be a [UpdatableSession]
+	    }
+	    "try to set the connection as readonly" in new Transaction{
+	      val t = tm.startNestedTransaction(ReadOnly)
 	      t.getSession.connection must be(connection)
+	      verify(connection,times(1)).setReadOnly(true)
 	    }
 	  }
 	  
@@ -57,7 +60,11 @@ class TestTransactionManager extends WordSpec with MockitoSugar with MustMatcher
 	    "create a Session" in new Transaction{
 	      val t = tm.startNestedTransaction(Updatable)
 	      t.getSession mustBe a [UpdatableSession]
+	    }
+	    "not try to set the connection as readonly" in new Transaction{
+	      val t = tm.startNestedTransaction(Updatable)
 	      t.getSession.connection must be(connection)
+	      verify(connection,never()).setReadOnly(true)
 	    }
 	  }
 	  

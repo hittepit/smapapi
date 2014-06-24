@@ -5,6 +5,7 @@ import javax.sql.DataSource
 import org.slf4j.Logger
 import org.hittepit.smapapi.core.Session
 import org.hittepit.smapapi.core.UpdatableSession
+import java.sql.SQLException
 
 object TransactionManager{
   var managers = Map[(String,String),TransactionManager]()
@@ -39,6 +40,13 @@ class TransactionManager (ds:DataSource) {
           logger.debug("Creating new base transaction, readonly = {}", readOnly)
 		  val connection = dataSource.getConnection()
 		  connection.setAutoCommit(false)
+		  if(ro==ReadOnly){
+		    try{
+		      connection.setReadOnly(true)
+		    }catch{
+		      case e:SQLException => logger.info("Impossible to set the connection to readonly")
+		    }
+		  }
 		  val session = Session(connection,ro)
 		  TransactionContext(session, readOnly)
       case Some(parentTransaction) =>
