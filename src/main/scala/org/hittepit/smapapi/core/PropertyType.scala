@@ -1,10 +1,12 @@
 package org.hittepit.smapapi.core
 
-import java.sql.ResultSet
-import java.sql.PreparedStatement
-import java.sql.Types
-import java.sql.Clob
 import java.sql.Blob
+import java.sql.Clob
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+import java.sql.Types
+
+import Sql._
 
 /**
  * Regroupe les méthodes de base pour accéder aux colonnes d'un ResultSet ou d'écrire les paramètres d'un PreparedStatement
@@ -86,11 +88,20 @@ object Sql {
 
 }
 
-import Sql._
-
 trait PropertyType[T] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]): T
   def setColumnValue(index: Int, value: T, ps: PreparedStatement): Unit
+}
+
+object GeneratedIntId extends PropertyType[GeneratedId[Int]]{
+  def getColumnValue(rs: ResultSet, column: Either[String, Int]) = Persistent(getNotNullableColumn(getIntColumn)(rs, column))
+  def setColumnValue(index: Int, value: GeneratedId[Int], ps: PreparedStatement) = {
+    val optionalValue = value match {
+      case Transient() => None
+      case Persistent(v) => Some(v)
+    }
+    setNullableColumn(setIntColumn)(index, optionalValue, ps)
+  }
 }
 
 object OptionalStringProperty extends PropertyType[Option[String]] {
