@@ -54,7 +54,7 @@ class TestSessionBehavious extends WordSpec with MustMatchers with MockitoSugar 
       "throw an AssertionError" in {
     	val session = new Session(mock[Connection]) with UpdatableSession
 	    session.close
-        an[AssertionError] must be thrownBy (session.insert("",List(),Column("",NotNullableInt)))
+        an[AssertionError] must be thrownBy (session.insert("",List(),Column("",IntProperty)))
       }
     }
     "list is called" must {

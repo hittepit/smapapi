@@ -46,10 +46,10 @@ class TestSelectionsInSession extends WordSpec with BeforeAndAfter with MustMatc
         val connection = ds.getConnection()
         val session = new Session(connection) with ReadOnlySession
         
-        val rows = session.select("select isbn,author from book where price > ?",List(Param(5.0,NotNullableDouble)))
+        val rows = session.select("select isbn,author from book where price > ?",List(Param(5.0,DoubleProperty)))
         
         val tuples = rows map {row:Row =>
-          (row.getColumnValue("isbn", NotNullableString),row.getColumnValue("author", NullableString))
+          (row.getColumnValue("isbn", StringProperty),row.getColumnValue("author", OptionalStringProperty))
         }
         
         connection.close
@@ -65,10 +65,10 @@ class TestSelectionsInSession extends WordSpec with BeforeAndAfter with MustMatc
         val connection = ds.getConnection()
         val session = new Session(connection) with ReadOnlySession
         val mapper = {row:Row =>
-          (row.getColumnValue("isbn", NotNullableString),row.getColumnValue("author", NullableString))
+          (row.getColumnValue("isbn", StringProperty),row.getColumnValue("author", OptionalStringProperty))
         }
         
-        val tuples = session.list("select isbn,author from book where price > ?",List(Param(5.0,NotNullableDouble)),mapper)
+        val tuples = session.list("select isbn,author from book where price > ?",List(Param(5.0,DoubleProperty)),mapper)
         
         connection.close
         
@@ -83,10 +83,10 @@ class TestSelectionsInSession extends WordSpec with BeforeAndAfter with MustMatc
         val connection = ds.getConnection()
         val session = new Session(connection) with ReadOnlySession
         val mapper = {row:Row =>
-          (row.getColumnValue("isbn", NotNullableString),row.getColumnValue("author", NullableString))
+          (row.getColumnValue("isbn", StringProperty),row.getColumnValue("author", OptionalStringProperty))
         }
         
-        val tuples = session.list("select isbn,author from book where price < ?",List(Param(0.0,NotNullableDouble)),mapper)
+        val tuples = session.list("select isbn,author from book where price < ?",List(Param(0.0,DoubleProperty)),mapper)
         
         connection.close
         
@@ -101,10 +101,10 @@ class TestSelectionsInSession extends WordSpec with BeforeAndAfter with MustMatc
         val connection = ds.getConnection()
         val session = new Session(connection) with ReadOnlySession
         val mapper = {row:Row =>
-          (row.getColumnValue("isbn", NotNullableString),row.getColumnValue("author", NullableString))
+          (row.getColumnValue("isbn", StringProperty),row.getColumnValue("author", OptionalStringProperty))
         }
         
-        val tuple = session.unique("select isbn,author from book where id = ?",List(Param(1,NotNullableInt)),mapper)
+        val tuple = session.unique("select isbn,author from book where id = ?",List(Param(1,IntProperty)),mapper)
         
         tuple must be(Some(("12312",Some("toto"))))
         connection.close
@@ -115,10 +115,10 @@ class TestSelectionsInSession extends WordSpec with BeforeAndAfter with MustMatc
         val connection = ds.getConnection()
         val session = new Session(connection) with ReadOnlySession
         val mapper = {row:Row =>
-          (row.getColumnValue("isbn", NotNullableString),row.getColumnValue("author", NullableString))
+          (row.getColumnValue("isbn", StringProperty),row.getColumnValue("author", OptionalStringProperty))
         }
         
-        val tuple = session.unique("select isbn,author from book where id = ?",List(Param(1000,NotNullableInt)),mapper)
+        val tuple = session.unique("select isbn,author from book where id = ?",List(Param(1000,IntProperty)),mapper)
         
         tuple must be(None)
         connection.close
@@ -129,10 +129,10 @@ class TestSelectionsInSession extends WordSpec with BeforeAndAfter with MustMatc
         val connection = ds.getConnection()
         val session = new Session(connection) with ReadOnlySession
         val mapper = {row:Row =>
-          (row.getColumnValue("isbn", NotNullableString),row.getColumnValue("author", NullableString))
+          (row.getColumnValue("isbn", StringProperty),row.getColumnValue("author", OptionalStringProperty))
         }
         
-        an [Exception] must be thrownBy (session.unique("select isbn,author from book where id > ?",List(Param(1,NotNullableInt)),mapper))
+        an [Exception] must be thrownBy (session.unique("select isbn,author from book where id > ?",List(Param(1,IntProperty)),mapper))
         
         connection.close
       }

@@ -1,10 +1,11 @@
 package org.hittepit.smapapi.core
 
+import java.sql.Connection
+
+import org.apache.commons.dbcp.BasicDataSource
 import org.scalatest.BeforeAndAfter
 import org.scalatest.MustMatchers
 import org.scalatest.WordSpec
-import org.apache.commons.dbcp.BasicDataSource
-import java.sql.Connection
 
 class TestInsertInSession extends WordSpec with BeforeAndAfter with MustMatchers {
   class DataSource extends BasicDataSource {
@@ -45,7 +46,7 @@ class TestInsertInSession extends WordSpec with BeforeAndAfter with MustMatchers
         val connection = ds.getConnection()
         val session = new Session(connection) with UpdatableSession
         
-        val valueGenerated = session.insert("insert into TEST (name) values (?)",List(Param("toto",NotNullableString)),Column("id",NotNullableInt))
+        val valueGenerated = session.insert("insert into TEST (name) values (?)",List(Param("toto",StringProperty)),Column("id",IntProperty))
   
         valueGenerated must be('defined)
         
@@ -57,7 +58,7 @@ class TestInsertInSession extends WordSpec with BeforeAndAfter with MustMatchers
         val connection = ds.getConnection()
         val session = new Session(connection) with UpdatableSession
         
-        val valueGenerated = session.insert("insert into TEST (name) values (?)",List(Param("hello",NotNullableString)),Column("id",NotNullableInt))
+        val valueGenerated = session.insert("insert into TEST (name) values (?)",List(Param("hello",StringProperty)),Column("id",IntProperty))
         
         valueGenerated must be('defined)
         val id = valueGenerated.get
@@ -79,7 +80,7 @@ class TestInsertInSession extends WordSpec with BeforeAndAfter with MustMatchers
         val connection = ds.getConnection()
         val session = new Session(connection) with UpdatableSession
         
-        session.insert("insert into TEST (id,name) values (?,?)",List(Param(1000,NotNullableInt),Param("hello again",NotNullableString)))
+        session.insert("insert into TEST (id,name) values (?,?)",List(Param(1000,IntProperty),Param("hello again",StringProperty)))
         
         val ps = connection.prepareStatement("select * from test where id = ?")
         ps.setInt(1, 1000)

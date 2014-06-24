@@ -14,7 +14,7 @@ class TestStringPropertyType extends WordSpec with MustMatchers with MockitoSuga
 	    "return a String with the value" in {
 		  implicit val rs = mock[ResultSet]
 		  when(rs.getString("test")).thenReturn("hello")
-		  val v = NotNullableString.getColumnValue(rs,Left("test"))
+		  val v = StringProperty.getColumnValue(rs,Left("test"))
 		  v must be("hello")
 	    }
 	  }
@@ -24,7 +24,7 @@ class TestStringPropertyType extends WordSpec with MustMatchers with MockitoSuga
 		  when(rs.getString("test")).thenReturn(null)
 		  when(rs.wasNull()).thenReturn(true)
 		  
-		  an [NullValueException] must be thrownBy NotNullableString.getColumnValue(rs,Left("test"))
+		  an [NullValueException] must be thrownBy StringProperty.getColumnValue(rs,Left("test"))
 	    }
 	  }
 	}
@@ -34,7 +34,7 @@ class TestStringPropertyType extends WordSpec with MustMatchers with MockitoSuga
 	    "return Some(String) with the value" in {
 		  implicit val rs = mock[ResultSet]
 		  when(rs.getString("test")).thenReturn("hello")
-		  val v = NullableString.getColumnValue(rs,Left("test"))
+		  val v = OptionalStringProperty.getColumnValue(rs,Left("test"))
 		  v must be(Some("hello"))
 	    }
 	  }
@@ -44,7 +44,7 @@ class TestStringPropertyType extends WordSpec with MustMatchers with MockitoSuga
 		  when(rs.getString("test")).thenReturn(null)
 		  when(rs.wasNull()).thenReturn(true)
 		  
-		  val v = NullableString.getColumnValue(rs,Left("test"))
+		  val v = OptionalStringProperty.getColumnValue(rs,Left("test"))
 		  v must be(None)
 	    }
 	  }
@@ -54,14 +54,14 @@ class TestStringPropertyType extends WordSpec with MustMatchers with MockitoSuga
 	  "receiving a Some(String) and a PreparedStatement" must {
 	    "set the string on the preparedStatement" in {
 	      implicit val ps = mock[PreparedStatement]
-	      NullableString.setColumnValue(1, Some("hello"),ps)
+	      OptionalStringProperty.setColumnValue(1, Some("hello"),ps)
 	      verify(ps).setString(1,"hello")
 	    }
 	  }
 	  "receiving None and a PreparedStatement" must {
 	    "set null on the PreparedStatement" in {
 	      implicit val ps = mock[PreparedStatement]
-	      NullableString.setColumnValue(1, None,ps)
+	      OptionalStringProperty.setColumnValue(1, None,ps)
 	      verify(ps).setNull(1,Types.VARCHAR)
 	    }
 	  }
@@ -71,7 +71,7 @@ class TestStringPropertyType extends WordSpec with MustMatchers with MockitoSuga
 	  "receiving a Some(String) and a PreparedStatement" must {
 	    "set the string on the preparedStatement" in {
 	      implicit val ps = mock[PreparedStatement]
-	      NotNullableString.setColumnValue(1, "hello",ps)
+	      StringProperty.setColumnValue(1, "hello",ps)
 	      verify(ps).setString(1,"hello")
 	    }
 	  }
