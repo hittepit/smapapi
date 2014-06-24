@@ -1,10 +1,11 @@
 package org.hittepit.smapapi.core
 
+import java.sql.Connection
+
+import org.apache.commons.dbcp.BasicDataSource
 import org.scalatest.BeforeAndAfter
 import org.scalatest.MustMatchers
 import org.scalatest.WordSpec
-import org.apache.commons.dbcp.BasicDataSource
-import java.sql.Connection
 
 class TestExecuteInSession extends WordSpec with BeforeAndAfter with MustMatchers {
   class DataSource extends BasicDataSource {
@@ -43,7 +44,7 @@ class TestExecuteInSession extends WordSpec with BeforeAndAfter with MustMatcher
     "called with an update request" must {
       "update the concerned rows" in {
         val connection = ds.getConnection()
-        val session = new Session(connection)
+        val session = new Session(connection) with UpdatableSession
         
         session.execute("update TEST set name=? where id=?",List(Param("Updated",NotNullableString),Param(1,NotNullableInt)))
         
@@ -57,7 +58,7 @@ class TestExecuteInSession extends WordSpec with BeforeAndAfter with MustMatcher
       }
       "return the number of affected rows" in {
         val connection = ds.getConnection()
-        val session = new Session(connection)
+        val session = new Session(connection) with UpdatableSession
         
         val updatedRows = session.execute("update TEST set name=? where id=?",List(Param("Updated",NotNullableString),Param(1,NotNullableInt)))
 
@@ -68,7 +69,7 @@ class TestExecuteInSession extends WordSpec with BeforeAndAfter with MustMatcher
       } 
       "return 0 if no row was affacted" in {
         val connection = ds.getConnection()
-        val session = new Session(connection)
+        val session = new Session(connection) with UpdatableSession
         
         val updatedRows = session.execute("update TEST set name=? where id=?",List(Param("Updated",NotNullableString),Param(1000,NotNullableInt)))
 
@@ -81,7 +82,7 @@ class TestExecuteInSession extends WordSpec with BeforeAndAfter with MustMatcher
     "called with an delete request" must {
       "delete the concerned rows" in {
         val connection = ds.getConnection()
-        val session = new Session(connection)
+        val session = new Session(connection) with UpdatableSession
         
         session.execute("delete from TEST where id=?",List(Param(1,NotNullableInt)))
         
@@ -94,7 +95,7 @@ class TestExecuteInSession extends WordSpec with BeforeAndAfter with MustMatcher
       }
       "return the number of affected rows" in {
         val connection = ds.getConnection()
-        val session = new Session(connection)
+        val session = new Session(connection) with UpdatableSession
         
         val affectedRows = session.execute("delete from TEST where id=?",List(Param(1,NotNullableInt)))
         
@@ -105,7 +106,7 @@ class TestExecuteInSession extends WordSpec with BeforeAndAfter with MustMatcher
       } 
       "return 0 if no row was affacted" in {
         val connection = ds.getConnection()
-        val session = new Session(connection)
+        val session = new Session(connection) with UpdatableSession
         
         val affectedRows = session.execute("delete from TEST where id=?",List(Param(1000,NotNullableInt)))
         
@@ -118,7 +119,7 @@ class TestExecuteInSession extends WordSpec with BeforeAndAfter with MustMatcher
     "called with an insert request" must {
       "insert a new row" in {
         val connection = ds.getConnection()
-        val session = new Session(connection)
+        val session = new Session(connection) with UpdatableSession
         
         session.execute("insert into TEST (id,name) values (?,?)",List(Param(1000,NotNullableInt),Param("hello",NotNullableString)))
         
@@ -133,7 +134,7 @@ class TestExecuteInSession extends WordSpec with BeforeAndAfter with MustMatcher
       }
       "return the number of affected rows" in {
         val connection = ds.getConnection()
-        val session = new Session(connection)
+        val session = new Session(connection) with UpdatableSession
         
         val n = session.execute("insert into TEST (id,name) values (?,?)",List(Param(1001,NotNullableInt),Param("hello again",NotNullableString)))
         

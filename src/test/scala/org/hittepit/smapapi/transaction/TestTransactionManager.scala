@@ -7,6 +7,9 @@ import org.scalatest.mock.MockitoSugar
 import javax.sql.DataSource
 import org.scalatest.MustMatchers
 import org.slf4j.LoggerFactory
+import org.hittepit.smapapi.core.ReadOnlySession
+import org.hittepit.smapapi.core.Session
+import org.hittepit.smapapi.core.UpdatableSession
 
 class TestTransactionManager extends WordSpec with MockitoSugar with MustMatchers{
   
@@ -24,6 +27,12 @@ class TestTransactionManager extends WordSpec with MockitoSugar with MustMatcher
 	      t.isReadonly must be(true)
 	      t.getSession.connection must be(connection)
 	      t.parent must be(None)
+	    }
+	    "create a readOnlySession" in new Transaction{
+	      val t = tm.startNestedTransaction(ReadOnly)
+	      t.getSession mustBe a [ReadOnlySession]
+	      t.getSession must not be a [UpdatableSession]
+	      t.getSession.connection must be(connection)
 	    }
 	  }
 	  
@@ -43,8 +52,12 @@ class TestTransactionManager extends WordSpec with MockitoSugar with MustMatcher
 	    "create a new non readOnly transaction without parent transaction" in new Transaction{
 	      val t = tm.startNestedTransaction(Updatable)
 	      t.isReadonly must be(false)
-	      t.getSession.connection must be(connection)
 	      t.parent must be(None)
+	    }
+	    "create a Session" in new Transaction{
+	      val t = tm.startNestedTransaction(Updatable)
+	      t.getSession mustBe a [UpdatableSession]
+	      t.getSession.connection must be(connection)
 	    }
 	  }
 	  
@@ -79,10 +92,9 @@ class TestTransactionManager extends WordSpec with MockitoSugar with MustMatcher
 	  }
 	  
 	  "starting an updatable transaction while a readonly transaction is already running" must {
-	    "create a new transaction that remains in readonly mode" in new Transaction{
+	    "throw an exception" in new Transaction{
 	      val t1 = tm.startNestedTransaction(ReadOnly)
-	      val t2 = tm.startNestedTransaction(Updatable)
-	      t2.isReadonly must be(true)
+	      an [Exception] must be thrownBy(tm.startNestedTransaction(Updatable))
 	    }
 	  }
 	  

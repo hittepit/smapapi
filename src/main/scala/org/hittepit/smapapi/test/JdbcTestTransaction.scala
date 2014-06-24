@@ -13,7 +13,7 @@ trait JdbcTestTransaction extends JdbcTransaction{
   def withRollback[T](f: Session => T): T = {
     val transaction = transactionManager.startNestedTransaction(Updatable)
     try {
-      f(transaction.getSession)
+      f(transaction.getSession.asInstanceOf[Session])
     } catch {
       case e: Throwable =>
         logger.info("Exception catched in execution. Mark transaction for rollback.", e)

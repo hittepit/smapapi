@@ -7,6 +7,9 @@ import scala.collection.mutable.ArraySeq
 import org.hittepit.smapapi.core.result.QueryResult
 import org.hittepit.smapapi.core.result.Row
 import org.slf4j.LoggerFactory
+import org.hittepit.smapapi.transaction.ReadOnly
+import org.hittepit.smapapi.transaction.TransactionMode
+import org.hittepit.smapapi.transaction.Updatable
 
 /**
  * Définition d'un paramètre à injecter dans un PreparedStatement.
@@ -81,17 +84,39 @@ object Column{
   }
 }
 
-/**
- * Classe encapsulant une connexion et automatisant les échanges avec la base de données en masquant l'utilisation de JDBC.
- * @constructor Crée une session
- * @param connection la connexion encapsulée dans la session. Une session n'utilise qu'une seule et unique connexion.
- */
-class Session(val connection: Connection) {
+object Session{
+  def apply(connection:Connection, transactionMode:TransactionMode):Session = transactionMode match{
+    case ReadOnly =>new Session(connection) with ReadOnlySession
+    case Updatable => new Session(connection) with UpdatableSession
+  } 
+}
+
+abstract class Session(val connection:Connection){
   val logger = LoggerFactory.getLogger(this.getClass)
   
   private var _closed=false
   
   def closed = _closed
+  
+  def close() = checkSession{
+    _closed = true
+    connection.close
+  }
+  
+  def rollback() = checkSession{connection.rollback()}
+  
+  protected def checkSession[T](f : =>T) = {
+    try{
+      assert(!_closed,"Session already closed")
+      f
+    } catch {
+      case e:AssertionError => logger.error("Session already closed")
+    		  				throw e
+    }
+  }
+}
+
+trait ReadOnlySession extends Session{
   /**
    * Méthode de base pour exécuter un SELECT SQL. Elle génère un ResulSet et l'encapsule dans un [[org.hittepit.smapapi.core.result.QueryResult QueryResult]].
    *  
@@ -135,6 +160,14 @@ class Session(val connection: Connection) {
     case List(t) => Some(t)
     case _ => throw new Exception("More than one result") //TODO exception 
   }
+}
+
+/**
+ * Classe encapsulant une connexion et automatisant les échanges avec la base de données en masquant l'utilisation de JDBC.
+ * @constructor Crée une session
+ * @param connection la connexion encapsulée dans la session. Une session n'utilise qu'une seule et unique connexion.
+ */
+trait UpdatableSession extends ReadOnlySession{
 
   def insert[T](sql: String, params: List[Param[_]], generatedId: Column[T]): Option[T] = insert(sql,params,Some(generatedId))
   
@@ -179,21 +212,5 @@ class Session(val connection: Connection) {
   
   def commit() = checkSession {
     connection.commit()
-  }
-  def rollback() = checkSession{connection.rollback()}
-  
-  def close() = checkSession{
-    _closed = true
-    connection.close
-  }
-  
-  private def checkSession[T](f : =>T) = {
-    try{
-      assert(!_closed,"Session already closed")
-      f
-    } catch {
-      case e:AssertionError => logger.error("Session already closed")
-    		  				throw e
-    }
   }
 }

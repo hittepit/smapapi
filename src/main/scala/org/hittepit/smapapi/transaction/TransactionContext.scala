@@ -1,7 +1,8 @@
 package org.hittepit.smapapi.transaction
 
 import scala.annotation.tailrec
-import java.sql.Connection
+
+import org.hittepit.smapapi.core.ReadOnlySession
 import org.hittepit.smapapi.core.Session
 
 trait TransactionMode

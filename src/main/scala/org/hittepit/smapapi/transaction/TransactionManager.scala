@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory
 import javax.sql.DataSource
 import org.slf4j.Logger
 import org.hittepit.smapapi.core.Session
+import org.hittepit.smapapi.core.UpdatableSession
 
 object TransactionManager{
   var managers = Map[(String,String),TransactionManager]()
@@ -38,13 +39,16 @@ class TransactionManager (ds:DataSource) {
           logger.debug("Creating new base transaction, readonly = {}", readOnly)
 		  val connection = dataSource.getConnection()
 		  connection.setAutoCommit(false)
-		  val session = new Session(connection)
+		  val session = Session(connection,ro)
 		  TransactionContext(session, readOnly)
       case Some(parentTransaction) =>
        	logger.debug("Creating new surrounding transaction, base transaction is readOnly = {}",parentTransaction.isReadonly)
         if(logger.isDebugEnabled()){
         	logger.debug("Base transaction is readOnly = {}",parentTransaction.isReadonly)
         }
+       	if(parentTransaction.isReadonly && ro==Updatable){
+       	  throw new Exception("Impossible to start an updatable tranaction inside a readOnly transaction") //TODO Exception
+       	}
       	TransactionContext(parentTransaction)
     }
 
@@ -73,7 +77,7 @@ class TransactionManager (ds:DataSource) {
 		              transaction.getSession.rollback()
 		            } else {
 		              logger.info("Commiting transaction")
-		              transaction.getSession.commit()
+		              transaction.getSession.asInstanceOf[UpdatableSession].commit()
 		            }
 		          } else {
 		            logger.info("Readonly transaction, no commit, not rollback")

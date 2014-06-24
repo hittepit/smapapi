@@ -43,7 +43,7 @@ class TestInsertInSession extends WordSpec with BeforeAndAfter with MustMatchers
     "called with auto-generated id" must {
       "return the value of the generated id" in {
         val connection = ds.getConnection()
-        val session = new Session(connection)
+        val session = new Session(connection) with UpdatableSession
         
         val valueGenerated = session.insert("insert into TEST (name) values (?)",List(Param("toto",NotNullableString)),Column("id",NotNullableInt))
   
@@ -55,7 +55,7 @@ class TestInsertInSession extends WordSpec with BeforeAndAfter with MustMatchers
       
       "insert the data in db" in {
         val connection = ds.getConnection()
-        val session = new Session(connection)
+        val session = new Session(connection) with UpdatableSession
         
         val valueGenerated = session.insert("insert into TEST (name) values (?)",List(Param("hello",NotNullableString)),Column("id",NotNullableInt))
         
@@ -77,7 +77,7 @@ class TestInsertInSession extends WordSpec with BeforeAndAfter with MustMatchers
     "called without auto-generated id" must {
       "insert the data in DB" in {
         val connection = ds.getConnection()
-        val session = new Session(connection)
+        val session = new Session(connection) with UpdatableSession
         
         session.insert("insert into TEST (id,name) values (?,?)",List(Param(1000,NotNullableInt),Param("hello again",NotNullableString)))
         

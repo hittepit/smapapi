@@ -44,7 +44,7 @@ class TestSelectionsInSession extends WordSpec with BeforeAndAfter with MustMatc
     "called without mapper" must {
       "generate a QueryResult that can be mapped to generate ojects" in {
         val connection = ds.getConnection()
-        val session = new Session(connection)
+        val session = new Session(connection) with ReadOnlySession
         
         val rows = session.select("select isbn,author from book where price > ?",List(Param(5.0,NotNullableDouble)))
         
@@ -63,7 +63,7 @@ class TestSelectionsInSession extends WordSpec with BeforeAndAfter with MustMatc
     "called with a mapper and a query that has results" must {
       "generate a list of objects" in {
         val connection = ds.getConnection()
-        val session = new Session(connection)
+        val session = new Session(connection) with ReadOnlySession
         val mapper = {row:Row =>
           (row.getColumnValue("isbn", NotNullableString),row.getColumnValue("author", NullableString))
         }
@@ -81,7 +81,7 @@ class TestSelectionsInSession extends WordSpec with BeforeAndAfter with MustMatc
     "called with a mapper and a query that results in nothing" must {
       "generate an empty list" in {
         val connection = ds.getConnection()
-        val session = new Session(connection)
+        val session = new Session(connection) with ReadOnlySession
         val mapper = {row:Row =>
           (row.getColumnValue("isbn", NotNullableString),row.getColumnValue("author", NullableString))
         }
@@ -99,7 +99,7 @@ class TestSelectionsInSession extends WordSpec with BeforeAndAfter with MustMatc
     "called with a request that returns one row" must{
       "return Some(object)" in {
         val connection = ds.getConnection()
-        val session = new Session(connection)
+        val session = new Session(connection) with ReadOnlySession
         val mapper = {row:Row =>
           (row.getColumnValue("isbn", NotNullableString),row.getColumnValue("author", NullableString))
         }
@@ -113,7 +113,7 @@ class TestSelectionsInSession extends WordSpec with BeforeAndAfter with MustMatc
     "called with a request that returns no row" must{
       "return None" in {
         val connection = ds.getConnection()
-        val session = new Session(connection)
+        val session = new Session(connection) with ReadOnlySession
         val mapper = {row:Row =>
           (row.getColumnValue("isbn", NotNullableString),row.getColumnValue("author", NullableString))
         }
@@ -127,7 +127,7 @@ class TestSelectionsInSession extends WordSpec with BeforeAndAfter with MustMatc
     "called with a request that returns more than one row" must{
       "throw an exception" in {
         val connection = ds.getConnection()
-        val session = new Session(connection)
+        val session = new Session(connection) with ReadOnlySession
         val mapper = {row:Row =>
           (row.getColumnValue("isbn", NotNullableString),row.getColumnValue("author", NullableString))
         }
