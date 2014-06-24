@@ -16,7 +16,6 @@ class TestJdbcTransaction extends WordSpec with MockitoSugar with MustMatchers{
     val ds = mock[DataSource]
 	when(ds.getConnection()).thenReturn(connection)
     val jdbcTransaction = new JdbcTransaction{
-      val logger = LoggerFactory.getLogger(classOf[JdbcTransaction])
       val transactionManager=new TransactionManager(ds)
     }
   }

@@ -18,7 +18,6 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.BeforeAndAfter
 
 class TestMapperImplementation extends WordSpec with MustMatchers with MockitoSugar with JdbcTestTransaction with BeforeAndAfter {
-  val logger = LoggerFactory.getLogger(classOf[TestMapperImplementation])
   val ds = new DataSource{}
   val transactionManager = TransactionManager(ds)
   val mapper = new BookMapper(transactionManager)

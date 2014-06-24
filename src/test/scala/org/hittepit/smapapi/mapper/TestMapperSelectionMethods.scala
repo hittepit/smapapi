@@ -17,7 +17,6 @@ import org.hittepit.smapapi.core.DoubleProperty
 import org.hittepit.smapapi.core.result.Row
 
 class TestMapperSelectionMethods extends WordSpec with MustMatchers with MockitoSugar with JdbcTestTransaction with BeforeAndAfter {
-  val logger = LoggerFactory.getLogger(classOf[TestMapperSelectionMethods])
   val ds = new DataSource{}
   val transactionManager = TransactionManager(ds)
   val mapper = new BookMapper(transactionManager)

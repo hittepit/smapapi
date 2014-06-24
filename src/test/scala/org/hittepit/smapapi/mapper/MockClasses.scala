@@ -17,7 +17,6 @@ import org.hittepit.smapapi.core.result.Row
 case class Book(id: Option[Int], isbn: String, title: String, author: Option[String], price:Double)
 
 class BookMapper(val transactionManager:TransactionManager) extends Mapper[Book, Option[Int]] with JdbcTransaction {
-  val logger = LoggerFactory.getLogger(classOf[BookMapper])
   val tableName = "BOOK"
   val pk = PrimaryKey(Column("id", OptionalIntProperty) <~ (_.id)) ~> ((book:Book,id:Option[Int]) => new Book(id,book.isbn,book.title,book.author,book.price))
   val isbn = Column("isbn", StringProperty) <~ (_.isbn)

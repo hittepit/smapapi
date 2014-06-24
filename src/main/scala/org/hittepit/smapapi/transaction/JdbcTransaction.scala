@@ -9,7 +9,7 @@ import org.hittepit.smapapi.core.UpdatableSession
 
 trait JdbcTransaction{
   val transactionManager:TransactionManager
-  val logger:Logger
+  val logger:Logger = LoggerFactory.getLogger(classOf[JdbcTransaction])
 
   def inTransaction[T](f: UpdatableSession => T): T = {
     val transaction = transactionManager.startNestedTransaction(Updatable)
