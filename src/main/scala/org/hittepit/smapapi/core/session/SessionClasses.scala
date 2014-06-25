@@ -23,9 +23,18 @@ import org.hittepit.smapapi.core.PropertyType
  */
 class Param[T](val value: T, val propertyType: PropertyType[T])
 
+/**
+ * Companion object for [[Param]]
+ */
 object Param{
+  /**
+   * Factory method
+   */
   def apply[T](value:T, propertyType: PropertyType[T]) = new Param(value,propertyType)
   
+  /**
+   * Extractor
+   */
   def unapply[T](param:Param[T]):Option[(T,PropertyType[T])] = Some(param.value,param.propertyType)
 }
 
@@ -86,25 +95,52 @@ object Column{
   }
 }
 
+/**
+ * Companion object of [[Session]]
+ */
 object Session{
+  /**
+   * Factory method that creates a [[ReadOnlySession]] if transaction is in ReadOnly mode or a [[UpdatableSession]] otherwise
+   * @param connection the embedded (opened) connection
+   * @param transactionMode [[org.hittepit.smapapi.transaction.ReadOnly ReadOnly]] or [[org.hittepit.smapapi.transaction.Updatable Updatable]]
+   * @return a new [[Session]] object
+   */
   def apply(connection:Connection, transactionMode:TransactionMode):Session = transactionMode match{
     case ReadOnly =>new Session(connection) with ReadOnlySession
     case Updatable => new Session(connection) with UpdatableSession
   } 
 }
 
+/**
+ * Base class for the different kinds of sessions.
+ * @param connection the embedded connection
+ */
 abstract class Session(val connection:Connection){
   val logger = LoggerFactory.getLogger(this.getClass)
   
   private var _closed=false
   
+  /**
+   * State of the session
+   */
   def closed = _closed
   
+  /**
+   * Closes the session.
+   * @throws AssertionError if the session is alredy closed
+   */
   def close() = checkSession{
     _closed = true
     connection.close
   }
   
+  /**
+   * Rollback the session (and the underlying connection) if the session if opened.
+   * 
+   * The method is defined in that level so that it could even be invoker on [[ReadOnlySession]], in which case it shouldn't have any impact.
+   * 
+   * @throws AssertionError if the session is alredy closed
+   */
   def rollback() = checkSession{connection.rollback()}
   
   protected def checkSession[T](f : =>T) = {
@@ -118,6 +154,9 @@ abstract class Session(val connection:Connection){
   }
 }
 
+/**
+ * Session that propose only readonly methods.
+ */
 trait ReadOnlySession extends Session{
   /**
    * Méthode de base pour exécuter un SELECT SQL. Elle génère un ResulSet et l'encapsule dans un [[org.hittepit.smapapi.core.result.QueryResult QueryResult]].
@@ -164,14 +203,24 @@ trait ReadOnlySession extends Session{
 }
 
 /**
- * Classe encapsulant une connexion et automatisant les échanges avec la base de données en masquant l'utilisation de JDBC.
- * @constructor Crée une session
- * @param connection la connexion encapsulée dans la session. Une session n'utilise qu'une seule et unique connexion.
+ * Class ajoutant à [[ReadOnlySession]] des méthodes qui permettent de mettre à jour la base de données.
  */
 trait UpdatableSession extends ReadOnlySession{
 
+  /**
+   * Insertion en base de données avec récupération de l'id auto-généré
+   * @param sql requête Sql pour un PreparedStatement (donc avec des ?)
+   * @param params les valeurs qui seront injectées dans la requête, dans l'ordre de leur injection
+   * @param generatedId definition de la colonne qui contient la clé auto-générée
+   * @return une option avec la valeur de la clé auo-générée, ou None si la DB ne permet pas de récupérer l'id auto-généré (exemple, fédération DB2)
+   */
   def insert[T](sql: String, params: List[Param[_]], generatedId: Column[T]): Option[T] = insert(sql,params,Some(generatedId))
-  
+
+  /**
+   * Insertion en base de données 
+   * @param sql requête Sql pour un PreparedStatement (donc avec des ?)
+   * @param params les valeurs qui seront injectées dans la requête, dans l'ordre de leur injection
+   */
   def insert[T](sql: String, params: List[Param[_]]=Nil): Unit = insert(sql,params,None) 
   
   private def insert[T](sql: String, params: List[Param[_]], generatedId: Option[Column[T]]): Option[T] = checkSession{
@@ -200,7 +249,12 @@ trait UpdatableSession extends ReadOnlySession{
       case None => None
     }
   }
-  
+ 
+  /**
+   * Exécution d'une requête sql (comme un PreparedStatement) quelconque avec paramètres
+   * @param sql requête Sql pour un PreparedStatement (donc avec des ?)
+   * @param params les valeurs qui seront injectées dans la requête, dans l'ordre de leur injection
+   */
   def execute(sql:String, params:List[Param[_]]=Nil):Int = checkSession{
     val ps = connection.prepareStatement(sql)
     params.zipWithIndex.foreach {
@@ -210,7 +264,10 @@ trait UpdatableSession extends ReadOnlySession{
     }
     ps.executeUpdate()
   }
-  
+
+  /**
+   * Commite la session actuelle
+   */
   def commit() = checkSession {
     connection.commit()
   }
