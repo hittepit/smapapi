@@ -3,8 +3,8 @@ package org.hittepit.smapapi.transaction
 import org.slf4j.LoggerFactory
 import javax.sql.DataSource
 import org.slf4j.Logger
-import org.hittepit.smapapi.core.Session
-import org.hittepit.smapapi.core.UpdatableSession
+import org.hittepit.smapapi.core.session.Session
+import org.hittepit.smapapi.core.session.UpdatableSession
 import java.sql.SQLException
 
 object TransactionManager{

@@ -10,7 +10,7 @@ import java.sql.ResultSet
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.BeforeAndAfter
 import org.hittepit.smapapi.transaction.TransactionManager
-import org.hittepit.smapapi.core.Param
+import org.hittepit.smapapi.core.session.Param
 import org.hittepit.smapapi.core.OptionalStringProperty
 import org.hittepit.smapapi.core.StringProperty
 import org.hittepit.smapapi.core.DoubleProperty

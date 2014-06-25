@@ -7,7 +7,7 @@ import java.sql.PreparedStatement
 import org.mockito.Mockito._
 import org.mockito.Matchers._
 import org.hittepit.smapapi.mapper.Condition._
-import org.hittepit.smapapi.core.Param
+import org.hittepit.smapapi.core.session.Param
 import org.hittepit.smapapi.core.StringProperty
 
 class TestCondition extends WordSpec with MustMatchers with MockitoSugar {

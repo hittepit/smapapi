@@ -1,4 +1,4 @@
-package org.hittepit.smapapi.core
+package org.hittepit.smapapi.core.session
 
 import java.sql.Connection
 import java.sql.ResultSet
@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory
 import org.hittepit.smapapi.transaction.ReadOnly
 import org.hittepit.smapapi.transaction.TransactionMode
 import org.hittepit.smapapi.transaction.Updatable
+import org.hittepit.smapapi.core.exception.NotUniqueResultException
+import org.hittepit.smapapi.core.PropertyType
 
 /**
  * Définition d'un paramètre à injecter dans un PreparedStatement.
@@ -152,13 +154,12 @@ trait ReadOnlySession extends Session{
    * @param params Liste d'objets [[Param]] qui seront injectés dans le PreparedStatement.
    * @param mapper une méthode qui transforme une [[org.hittepit.smapapi.core.result.Row Row]] en objet T
    * @return un objet T
-   * @throws Exception lorsque la requête retourne plusieurs objets
-   * @todo l'exception doit être plus spécifique
+   * @throws lorsque la requête retourne plusieurs objets, [[org.hittepit.smapapi.core.NotUniqueResultException NotUniqueResultException]]
    */
   def unique[T](sql: String, params: List[Param[_]]=Nil, mapper: Row => T): Option[T] = select(sql, params) map (mapper) match {
     case Nil => None
     case List(t) => Some(t)
-    case _ => throw new Exception("More than one result") //TODO exception 
+    case l:List[T] => throw new NotUniqueResultException("Request returns "+l.size+" results. One was expected. Try to use list or refine your query.") 
   }
 }
 

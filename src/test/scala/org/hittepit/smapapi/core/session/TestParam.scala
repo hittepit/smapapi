@@ -1,7 +1,9 @@
-package org.hittepit.smapapi.core
+package org.hittepit.smapapi.core.session
 
 import org.scalatest.WordSpec
 import org.scalatest.MustMatchers
+import org.hittepit.smapapi.core.StringProperty
+import org.hittepit.smapapi.core.IntProperty
 
 class TestParam extends WordSpec with MustMatchers {
 	"The Param factory" when {

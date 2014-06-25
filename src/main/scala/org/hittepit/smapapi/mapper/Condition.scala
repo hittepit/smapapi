@@ -1,6 +1,6 @@
 package org.hittepit.smapapi.mapper
 
-import org.hittepit.smapapi.core.Param
+import org.hittepit.smapapi.core.session.Param
 
 /*
 Oracle

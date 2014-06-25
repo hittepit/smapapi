@@ -7,6 +7,7 @@ import org.mockito.Mockito._
 import java.sql.ResultSet
 import java.sql.PreparedStatement
 import java.sql.Types
+import org.hittepit.smapapi.core.exception.NullValueException
 
 class TestStringPropertyType extends WordSpec with MustMatchers with MockitoSugar {
 	"The columnValue method of a NotNullableVarchar" when {

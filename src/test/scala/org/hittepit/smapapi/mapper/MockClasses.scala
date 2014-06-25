@@ -7,7 +7,7 @@ import java.sql.ResultSet
 import org.slf4j.LoggerFactory
 import java.sql.Connection
 import org.hittepit.smapapi.test.JdbcTestTransaction
-import org.hittepit.smapapi.core.Column
+import org.hittepit.smapapi.core.session.Column
 import org.hittepit.smapapi.core.OptionalStringProperty
 import org.hittepit.smapapi.core.OptionalIntProperty
 import org.hittepit.smapapi.core.StringProperty

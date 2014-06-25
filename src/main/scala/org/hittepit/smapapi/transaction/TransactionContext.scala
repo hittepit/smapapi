@@ -2,8 +2,8 @@ package org.hittepit.smapapi.transaction
 
 import scala.annotation.tailrec
 
-import org.hittepit.smapapi.core.ReadOnlySession
-import org.hittepit.smapapi.core.Session
+import org.hittepit.smapapi.core.session.ReadOnlySession
+import org.hittepit.smapapi.core.session.Session
 
 trait TransactionMode
 object ReadOnly extends TransactionMode{

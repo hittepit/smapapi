@@ -3,9 +3,9 @@ package org.hittepit.smapapi.transaction
 import java.sql.Connection
 import org.slf4j.LoggerFactory
 import org.slf4j.Logger
-import org.hittepit.smapapi.core.Session
-import org.hittepit.smapapi.core.ReadOnlySession
-import org.hittepit.smapapi.core.UpdatableSession
+import org.hittepit.smapapi.core.session.Session
+import org.hittepit.smapapi.core.session.ReadOnlySession
+import org.hittepit.smapapi.core.session.UpdatableSession
 
 trait JdbcTransaction{
   val transactionManager:TransactionManager

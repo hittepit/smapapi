@@ -7,9 +7,9 @@ import org.scalatest.mock.MockitoSugar
 import javax.sql.DataSource
 import org.scalatest.MustMatchers
 import org.slf4j.LoggerFactory
-import org.hittepit.smapapi.core.ReadOnlySession
-import org.hittepit.smapapi.core.Session
-import org.hittepit.smapapi.core.UpdatableSession
+import org.hittepit.smapapi.core.session.ReadOnlySession
+import org.hittepit.smapapi.core.session.Session
+import org.hittepit.smapapi.core.session.UpdatableSession
 
 class TestTransactionManager extends WordSpec with MockitoSugar with MustMatchers{
   

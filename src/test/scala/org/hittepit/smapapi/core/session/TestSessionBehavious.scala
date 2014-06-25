@@ -1,9 +1,10 @@
-package org.hittepit.smapapi.core
+package org.hittepit.smapapi.core.session
 
 import org.scalatest.WordSpec
 import org.scalatest.MustMatchers
 import org.scalatest.mock.MockitoSugar
 import java.sql.Connection
+import org.hittepit.smapapi.core.IntProperty
 
 class TestSessionBehavious extends WordSpec with MustMatchers with MockitoSugar {
   "A session object" when {

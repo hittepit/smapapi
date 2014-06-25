@@ -1,11 +1,15 @@
-package org.hittepit.smapapi.core
+package org.hittepit.smapapi.core.session
 
 import org.apache.commons.dbcp.BasicDataSource
 import java.sql.Connection
 import org.scalatest.WordSpec
 import org.scalatest.BeforeAndAfter
 import org.scalatest.MustMatchers
+import org.hittepit.smapapi.core.OptionalStringProperty
+import org.hittepit.smapapi.core.StringProperty
+import org.hittepit.smapapi.core.DoubleProperty
 import org.hittepit.smapapi.core.result.Row
+import org.hittepit.smapapi.core.IntProperty
 
 class TestSelectionsInSession extends WordSpec with BeforeAndAfter with MustMatchers{
   class DataSource extends BasicDataSource {

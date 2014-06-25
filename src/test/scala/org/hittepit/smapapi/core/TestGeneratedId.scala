@@ -1,7 +1,7 @@
 package org.hittepit.smapapi.core
 
-import org.scalatest.WordSpec
 import org.scalatest.MustMatchers
+import org.scalatest.WordSpec
 
 class TestGeneratedId extends WordSpec with MustMatchers{
 	"GeneratedId" when {

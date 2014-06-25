@@ -5,8 +5,8 @@ import java.sql.Clob
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Types
-
 import Sql._
+import org.hittepit.smapapi.core.exception.NullValueException
 
 /**
  * Regroupe les méthodes de base pour accéder aux colonnes d'un ResultSet ou d'écrire les paramètres d'un PreparedStatement
@@ -45,7 +45,7 @@ object Sql {
       case Left(c) => getter._2(rs, c)
       case Right(c) => getter._1(rs, c)
     }
-    if (rs.wasNull()) throw new NullValueException else v
+    if (rs.wasNull()) throw new NullValueException("Null value in column not expected. Try to use an Optional PropertyType instead.") else v
   }
 
   /**

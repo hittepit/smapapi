@@ -5,7 +5,7 @@ import java.sql.Connection
 import org.hittepit.smapapi.transaction.Updatable
 import org.slf4j.LoggerFactory
 import org.slf4j.Logger
-import org.hittepit.smapapi.core.Session
+import org.hittepit.smapapi.core.session.Session
 
 trait JdbcTestTransaction extends JdbcTransaction{
   val logger:Logger

@@ -7,7 +7,7 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.BeforeAndAfter
 import org.hittepit.smapapi.transaction.TransactionManager
 import org.scalatest.mock.MockitoSugar
-import org.hittepit.smapapi.core.Column
+import org.hittepit.smapapi.core.session.Column
 import org.hittepit.smapapi.core.StringProperty
 
 class TestColumnDefObject extends WordSpec with MustMatchers with  MockitoSugar{
