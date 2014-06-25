@@ -79,6 +79,8 @@ object Sql {
   val setBlobColumn: ColumnSetter[Blob] = ((ps: PreparedStatement, index: Int, v: Blob) => ps.setBlob(index, v), Types.BLOB)
   val getIntColumn: ColumnGetter[Int] = ((rs: ResultSet, index: Int) => rs.getInt(index), (rs: ResultSet, name: String) => rs.getInt(name))
   val setIntColumn: ColumnSetter[Int] = ((ps: PreparedStatement, index: Int, v: Int) => ps.setInt(index, v), Types.INTEGER)
+  val getLongColumn: ColumnGetter[Long] = ((rs: ResultSet, index: Int) => rs.getLong(index), (rs: ResultSet, name: String) => rs.getLong(name))
+  val setLongColumn: ColumnSetter[Long] = ((ps: PreparedStatement, index: Int, v: Long) => ps.setLong(index, v), Types.BIGINT)
   val getDoubleColumn: ColumnGetter[Double] = ((rs: ResultSet, index: Int) => rs.getDouble(index), (rs: ResultSet, name: String) => rs.getDouble(name))
   val setDoubleColumn: ColumnSetter[Double] = ((ps: PreparedStatement, index: Int, v: Double) => ps.setDouble(index, v), Types.DOUBLE)
   val getBooleanColumn: ColumnGetter[Boolean] = ((rs: ResultSet, index: Int) => rs.getBoolean(index), (rs: ResultSet, name: String) => rs.getBoolean(name))
@@ -101,6 +103,17 @@ object GeneratedIntId extends PropertyType[GeneratedId[Int]]{
       case Persistent(v) => Some(v)
     }
     setNullableColumn(setIntColumn)(index, optionalValue, ps)
+  }
+}
+
+object GeneratedLongId extends PropertyType[GeneratedId[Long]]{
+  def getColumnValue(rs: ResultSet, column: Either[String, Int]) = Persistent(getNotNullableColumn(getLongColumn)(rs, column))
+  def setColumnValue(index: Int, value: GeneratedId[Long], ps: PreparedStatement) = {
+    val optionalValue = value match {
+      case Transient() => None
+      case Persistent(v) => Some(v)
+    }
+    setNullableColumn(setLongColumn)(index, optionalValue, ps)
   }
 }
 
@@ -142,6 +155,16 @@ object OptionalIntProperty extends PropertyType[Option[Int]] {
 object IntProperty extends PropertyType[Int] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getIntColumn)(rs, column)
   def setColumnValue(index: Int, value: Int, ps: PreparedStatement) = setNotNullableColumn(setIntColumn)(index, value, ps)
+}
+
+object OptionalLongProperty extends PropertyType[Option[Long]] {
+  def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getLongColumn)(rs, column)
+  def setColumnValue(index: Int, value: Option[Long], ps: PreparedStatement) = setNullableColumn(setLongColumn)(index, value, ps)
+}
+
+object LongProperty extends PropertyType[Long] {
+  def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getLongColumn)(rs, column)
+  def setColumnValue(index: Int, value: Long, ps: PreparedStatement) = setNotNullableColumn(setLongColumn)(index, value, ps)
 }
 
 object OptionalDoubleProperty extends PropertyType[Option[Double]] {
