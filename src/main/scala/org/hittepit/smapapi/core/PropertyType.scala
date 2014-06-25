@@ -70,7 +70,7 @@ object Sql {
   def setNotNullableColumn[T](setter: ColumnSetter[T])(index: Int, value: T, ps: PreparedStatement) =
     setter._1(ps, index, value)
 
-  //TODO Long, Float, Date, Time
+  //TODO Float, Date, Time
   val getStringColumn: ColumnGetter[String] = ((rs: ResultSet, index: Int) => rs.getString(index), (rs: ResultSet, name: String) => rs.getString(name))
   val setStringColumn: ColumnSetter[String] = ((ps: PreparedStatement, index: Int, v: String) => ps.setString(index, v), Types.VARCHAR)
   val getClobColumn: ColumnGetter[Clob] = ((rs: ResultSet, index: Int) => rs.getClob(index), (rs: ResultSet, name: String) => rs.getClob(name))
@@ -90,13 +90,38 @@ object Sql {
 
 }
 
+/**
+ * Définition de base d'un type de propriété. Cette classe peut être étendue pour définir n'importe quel type de propriété.
+ * 
+ * Elle est utilisée pour définir des [[org.hittepit.smapapi.core.session.Param Param]] 
+ * injectés dans les PreparedStatement et des [[org.hittepit.smapapi.core.session.Column Column]] pour récupérer des données
+ * dans les ResultSet.
+ * 
+ *  Elle fournit des méthodes qui masquent l'utilisation des ResultSet et des PreparedStatement. 
+ */
 trait PropertyType[T] {
+  /**
+   * Méthode qui retourne la valeur de type T d'une colonne définie soit par son index, soit par son nom.
+   * @param rs le ResulSet dans lequel la propriété est récupérée
+   * @param column la colonne à récupérer dans le ResultSet, soit par son index, soit par son nom
+   * @return la valeur de la propriété
+   */
   def getColumnValue(rs: ResultSet, column: Either[String, Int]): T
+  
+  /**
+   * Méthode qui permet d'injecter une valeur dans un PreparedStatement.
+   * @param index l'index du paramètre dans le PreparedStatement
+   * @param value la valeur de type T
+   * @param ps le PreparedStatement
+   */
   def setColumnValue(index: Int, value: T, ps: PreparedStatement): Unit
 }
 
+/**
+ * PropertyType pour une propriété de type [[org.hittepit.smapapi.core.GeneratedId GeneratedId[Int]]]
+ */
 object GeneratedIntId extends PropertyType[GeneratedId[Int]]{
-  def getColumnValue(rs: ResultSet, column: Either[String, Int]) = Persistent(getNotNullableColumn(getIntColumn)(rs, column))
+  def getColumnValue(rs: ResultSet, column: Either[String, Int]):GeneratedId[Int] = Persistent(getNotNullableColumn(getIntColumn)(rs, column))
   def setColumnValue(index: Int, value: GeneratedId[Int], ps: PreparedStatement) = {
     val optionalValue = value match {
       case Transient() => None
@@ -106,8 +131,11 @@ object GeneratedIntId extends PropertyType[GeneratedId[Int]]{
   }
 }
 
+/**
+ * PropertyType pour une propriété de type [[org.hittepit.smapapi.core.GeneratedId GeneratedId[Long]]]
+ */
 object GeneratedLongId extends PropertyType[GeneratedId[Long]]{
-  def getColumnValue(rs: ResultSet, column: Either[String, Int]) = Persistent(getNotNullableColumn(getLongColumn)(rs, column))
+  def getColumnValue(rs: ResultSet, column: Either[String, Int]):GeneratedId[Long] = Persistent(getNotNullableColumn(getLongColumn)(rs, column))
   def setColumnValue(index: Int, value: GeneratedId[Long], ps: PreparedStatement) = {
     val optionalValue = value match {
       case Transient() => None
@@ -117,81 +145,129 @@ object GeneratedLongId extends PropertyType[GeneratedId[Long]]{
   }
 }
 
+/**
+ * PropertyType pour une propriété de type Option[String]
+ */
 object OptionalStringProperty extends PropertyType[Option[String]] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getStringColumn)(rs, column)
   def setColumnValue(index: Int, value: Option[String], ps: PreparedStatement) = setNullableColumn(setStringColumn)(index, value, ps)
 }
 
+/**
+ * PropertyType pour une propriété de type String
+ */
 object StringProperty extends PropertyType[String] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getStringColumn)(rs, column)
   def setColumnValue(index: Int, value: String, ps: PreparedStatement) = setNotNullableColumn(setStringColumn)(index, value, ps)
 }
 
+/**
+ * PropertyType pour une propriété de type Option[Clob]
+ */
 object OptionalClobProperty extends PropertyType[Option[Clob]] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getClobColumn)(rs, column)
   def setColumnValue(index: Int, value: Option[Clob], ps: PreparedStatement) = setNullableColumn(setClobColumn)(index, value, ps)
 }
 
+/**
+ * PropertyType pour une propriété de type Clob
+ */
 object ClobProperty extends PropertyType[Clob] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getClobColumn)(rs, column)
   def setColumnValue(index: Int, value: Clob, ps: PreparedStatement) = setNotNullableColumn(setClobColumn)(index, value, ps)
 }
 
+/**
+ * PropertyType pour une propriété de type Option[Blob]
+ */
 object OptionalBlobProperty extends PropertyType[Option[Blob]] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getBlobColumn)(rs, column)
   def setColumnValue(index: Int, value: Option[Blob], ps: PreparedStatement) = setNullableColumn(setBlobColumn)(index, value, ps)
 }
 
+/**
+ * PropertyType pour une propriété de type Blob
+ */
 object BlobProperty extends PropertyType[Blob] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getBlobColumn)(rs, column)
   def setColumnValue(index: Int, value: Blob, ps: PreparedStatement) = setNotNullableColumn(setBlobColumn)(index, value, ps)
 }
 
+/**
+ * PropertyType pour une propriété de type Option[Int]
+ */
 object OptionalIntProperty extends PropertyType[Option[Int]] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getIntColumn)(rs, column)
   def setColumnValue(index: Int, value: Option[Int], ps: PreparedStatement) = setNullableColumn(setIntColumn)(index, value, ps)
 }
 
+/**
+ * PropertyType pour une propriété de type Int
+ */
 object IntProperty extends PropertyType[Int] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getIntColumn)(rs, column)
   def setColumnValue(index: Int, value: Int, ps: PreparedStatement) = setNotNullableColumn(setIntColumn)(index, value, ps)
 }
 
+/**
+ * PropertyType pour une propriété de type Option[Long]
+ */
 object OptionalLongProperty extends PropertyType[Option[Long]] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getLongColumn)(rs, column)
   def setColumnValue(index: Int, value: Option[Long], ps: PreparedStatement) = setNullableColumn(setLongColumn)(index, value, ps)
 }
 
+/**
+ * PropertyType pour une propriété de type Long
+ */
 object LongProperty extends PropertyType[Long] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getLongColumn)(rs, column)
   def setColumnValue(index: Int, value: Long, ps: PreparedStatement) = setNotNullableColumn(setLongColumn)(index, value, ps)
 }
 
+/**
+ * PropertyType pour une propriété de type Option[Double]
+ */
 object OptionalDoubleProperty extends PropertyType[Option[Double]] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getDoubleColumn)(rs, column)
   def setColumnValue(index: Int, value: Option[Double], ps: PreparedStatement) = setNullableColumn(setDoubleColumn)(index, value, ps)
 }
 
+/**
+ * PropertyType pour une propriété de type Double
+ */
 object DoubleProperty extends PropertyType[Double] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getDoubleColumn)(rs, column)
   def setColumnValue(index: Int, value: Double, ps: PreparedStatement) = setNotNullableColumn(setDoubleColumn)(index, value, ps)
 }
 
+/**
+ * PropertyType pour une propriété de type Option[Boolean]
+ */
 object OptionalBooleanProperty extends PropertyType[Option[Boolean]] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getBooleanColumn)(rs, column)
   def setColumnValue(index: Int, value: Option[Boolean], ps: PreparedStatement) = setNullableColumn(setBooleanColumn)(index, value, ps)
 }
 
+/**
+ * PropertyType pour une propriété de type Boolean
+ */
 object BooleanProperty extends PropertyType[Boolean] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getBooleanColumn)(rs, column)
   def setColumnValue(index: Int, value: Boolean, ps: PreparedStatement) = setNotNullableColumn(setBooleanColumn)(index, value, ps)
 }
 
+/**
+ * PropertyType pour une propriété de type Option[BigDecimal]
+ */
 object OptionalBigDecimalProperty extends PropertyType[Option[BigDecimal]] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNullableColumn(getBigDecimalColumn)(rs, column)
   def setColumnValue(index: Int, value: Option[BigDecimal], ps: PreparedStatement) = setNullableColumn(setBigDecimalColumn)(index, value, ps)
 }
 
+/**
+ * PropertyType pour une propriété de type BigDecimal
+ */
 object BigDecimalProperty extends PropertyType[BigDecimal] {
   def getColumnValue(rs: ResultSet, column: Either[String, Int]) = getNotNullableColumn(getBigDecimalColumn)(rs, column)
   def setColumnValue(index: Int, value: BigDecimal, ps: PreparedStatement) = setNotNullableColumn(setBigDecimalColumn)(index, value, ps)
