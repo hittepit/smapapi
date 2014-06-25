@@ -154,7 +154,7 @@ trait ReadOnlySession extends Session{
    * @param params Liste d'objets [[Param]] qui seront injectés dans le PreparedStatement.
    * @param mapper une méthode qui transforme une [[org.hittepit.smapapi.core.result.Row Row]] en objet T
    * @return un objet T
-   * @throws lorsque la requête retourne plusieurs objets, [[org.hittepit.smapapi.core.NotUniqueResultException NotUniqueResultException]]
+   * @throws lorsque la requête retourne plusieurs objets, [[org.hittepit.smapapi.core.exception.NotUniqueResultException NotUniqueResultException]]
    */
   def unique[T](sql: String, params: List[Param[_]]=Nil, mapper: Row => T): Option[T] = select(sql, params) map (mapper) match {
     case Nil => None

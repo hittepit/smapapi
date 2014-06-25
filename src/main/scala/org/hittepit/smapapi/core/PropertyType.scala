@@ -38,7 +38,7 @@ object Sql {
    * @param rs le ResultSet
    * @param column soit le nom de la colonne, soit son index
    * @return la valeur de la colonne
-   * @throws si la colonne est nulle, [[org.hittepit.smapapi.core.NullValueException NullValueException]]
+   * @throws si la colonne est nulle, [[org.hittepit.smapapi.core.exception.NullValueException NullValueException]]
    */
   def getNotNullableColumn[T](getter: ColumnGetter[T])(rs: ResultSet, column: Either[String, Int]): T = {
     val v = column match {
